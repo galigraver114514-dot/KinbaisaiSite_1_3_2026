@@ -1,117 +1,1112 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文化祭 - こっくりさんからの脱出</title>
-    <!-- 字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000;
-            font-family: 'DotGothic16', sans-serif;
-            cursor: none; /* 隐藏默认鼠标 */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="文化祭ホラーアトラクション『こっくりさんからの脱出』入口ページ。旧校舎の封印を解き、生きて脱出せよ。">
+<title>こっくりさんからの脱出 ― 旧校舎・封印の呪い｜文化祭出し物</title>
+<!-- ============================================================
+  文化祭ホラー脱出ゲーム「こっくりさんからの脱出」　入口ページ
+  ・シングルHTML（外部画像なし / 背景は自作ベクターSVG＝権利クリーン）
+  ・差し替えポイントは各所コメント「★」を参照
+============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Kaisei+Tokumin:wght@700;900&family=Shippori+Mincho:wght@500;600&family=Yuji+Mai&family=Yuji+Syuku&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   0. デザイントークン（配色を一元管理）
+   全体の色を変えたいときは、この変数を書き換えるだけ
+============================================================ */
+:root{
+  --ink:        #04050c;   /* 最深部（ほぼ黒）          */
+  --night:      #0b0e20;   /* 夜空                        */
+  --night2:     #161b38;   /* 中景の青                     */
+  --paper:      #f3ecdd;   /* 和紙のような温かい白（主文字）*/
+  --mist:       #aab0c6;   /* 灰紫（補助文字）             */
+  --blood:      #e0203c;   /* 呪いの朱                     */
+  --blood-dark: #7e1220;   /* 影になった朱                 */
+  --ember:      #ffb45e;   /* 提灯の灯り                   */
+  --fox:        #9adcff;   /* 狐火の蒼                     */
+  --paper-dim:  rgba(243,236,221,.62);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+/* 横向きのスクロールは一切させない（装飾レイヤーがはみ出してもOK） */
+html{overflow-x:hidden}
+body{
+  font-family:"Shippori Mincho","Kaisei Tokumin",serif;
+  background:var(--ink);
+  color:var(--paper);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* 操作感のあるフォント＝画面上の「機械/標識」部分 */
+.mono{font-family:"DotGothic16",monospace}
 
-        #bg-anim {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0;
-            transition: opacity 3s ease-in-out;
-            z-index: -1;
-        }
+/* ============================================================
+   1. 背景レイヤー（自作ベクターSVG・夜空の旧校舎）
+============================================================ */
+#bgScene{
+  position:fixed; inset:0;
+  width:100%; height:100%;
+  z-index:0;
+  overflow:hidden;   /* SVG内の絵が画面外へはみ出さないようにする */
+  will-change:transform;
+}
+/* 全体を覆う青い夜のフィルター（写真背景に差し替えても馴染む量） */
+#blueNight{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(4,6,16,.28) 0%, rgba(4,6,16,0) 38%),
+    radial-gradient(120% 90% at 50% 108%, rgba(2,3,8,.85) 0%, rgba(2,3,8,0) 60%);
+}
+/* 地面のもや（青白い怪気） */
+#mistWrap{position:fixed; inset:0; z-index:2; pointer-events:none; overflow:hidden}
+.mistBand{position:absolute; bottom:-9vh; height:22vh; width:140vw; left:-20vw;
+  background:radial-gradient(50% 100% at 50% 100%, rgba(160,180,210,.16), transparent 70%);
+  filter:blur(14px); mix-blend-mode:screen;}
+.mistBand.a{animation:drift 26s -6s linear infinite}
+.mistBand.b{animation:drift 34s -20s linear infinite reverse; opacity:.7; transform:scaleX(.8)}
+@keyframes drift{from{transform:translateX(-6vw)}to{transform:translateX(8vw)}}
+/* 立ち上る黒気（画面下から） */
+.fog{position:absolute; bottom:-24vh; width:34vw; height:46vh;
+  background:radial-gradient(55% 60% at 50% 100%, rgba(0,0,0,.85), transparent 72%);
+  filter:blur(26px); z-index:2; pointer-events:none;
+  animation:riseUp 13s linear infinite;}
+@keyframes riseUp{
+  0%{transform:translateY(6vh) scale(.9); opacity:0}
+  18%{opacity:.9}
+  100%{transform:translateY(-26vh) scale(1.6); opacity:0}
+}
 
-        /* 入场动画：1. 文字浮现 */
-        .title-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            text-align: center;
-            z-index: 10;
-            opacity: 0;
-            animation: fadeInAndBleed 5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;
-        }
+/* ============================================================
+   2. フィルム感（粒・走査線・周辺減光）
+============================================================ */
+#film{position:fixed; inset:0; z-index:4; pointer-events:none}
+#film::before{ /* 粒ノイズ */
+  content:""; position:absolute; inset:-40px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='0.5'/></svg>");
+  opacity:.055; animation:flicker 1.6s steps(4) infinite;
+}
+@keyframes flicker{0%,100%{opacity:.05}50%{opacity:.085}75%{opacity:.045}}
+#film::after{ /* 走査線＋周辺減光 */
+  content:""; position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 100% at 50% 42%, transparent 52%, rgba(2,3,8,.62) 100%);
+}
 
-        .title {
-            font-size: 4rem;
-            color: #e74c3c;
-            text-shadow: 0 0 15px #c0392b, 0 0 30px #900;
-            letter-spacing: 0.1em;
-            mix-blend-mode: screen;
-        }
+/* ============================================================
+   3. 開幕（カーテン＋暗幕）
+   演出レイヤーは全て #intro の中へ。
+   はみ出した装飾がページを横スクロールさせないよう overflow:hidden で閉じる
+============================================================ */
+#intro{position:fixed; inset:0; z-index:90; overflow:hidden; pointer-events:none}
+.curtain{position:absolute; top:0; bottom:0; width:52vw; pointer-events:none;
+  background:linear-gradient(90deg,#1c0307,#3a0610 46%,#560b18 100%);}
+#curtainL{left:0; box-shadow:14px 0 40px rgba(0,0,0,.55)}
+#curtainR{right:0; transform:scaleX(-1)}
+#curtainL.rise{animation:curtainAwayL 1.15s cubic-bezier(.7,0,.3,1) forwards}
+#curtainR.rise{animation:curtainAwayR 1.15s cubic-bezier(.7,0,.3,1) forwards}
+@keyframes curtainAwayL{to{transform:translateX(-106%)}}
+@keyframes curtainAwayR{to{transform:translateX(106%)}}
+/* 幕が開く直前まで画面を黒く */
+#veil{position:absolute; inset:0; background:#000; pointer-events:none;
+  transition:opacity .9s ease .45s}
+#veil.gone{opacity:0}
+/* 背景側の演出一式も専用レイヤーでクリップ */
+#fxBack{position:fixed; inset:0; z-index:0; overflow:hidden}
 
-        /* 入场动画：2. 文字根据心脏搏动节奏抖动 */
-        .subtitle {
-            font-size: 1.2rem;
-            color: #ccc;
-            margin-top: 40px;
-            letter-spacing: 0.5em;
-            filter: blur(1px);
-            text-shadow: 0 0 5px #000;
-        }
+/* ============================================================
+   1.5 環境アニメ（光塵・符札・悪寒のフラッシュ）
+============================================================ */
+#envLayer{position:fixed; inset:0; z-index:3; pointer-events:none; overflow:hidden}
+.dust{position:absolute; bottom:-3vh; width:3px; height:3px; border-radius:50%;
+  background:radial-gradient(circle, #f2fcff 0%, #9adcff 55%, rgba(90,170,255,0) 75%);
+  box-shadow:0 0 8px rgba(154,220,255,.7);
+  opacity:0; animation:dustRise linear infinite;}
+@keyframes dustRise{
+  0%{transform:translate3d(0,0,0) scale(.5); opacity:0}
+  10%{opacity:.85}
+  80%{opacity:.4}
+  100%{transform:translate3d(var(--dx,16px),-108vh,0) scale(1.2); opacity:0}
+}
+.ofuda{position:absolute; top:-16vh; width:11px; height:66px;
+  background:linear-gradient(180deg, rgba(240,235,218,.9) 0%, rgba(225,215,190,.85) 100%);
+  box-shadow:0 2px 8px rgba(0,0,0,.55); opacity:0;
+  animation:ofudaFall linear infinite;}
+.ofuda::before{content:""; position:absolute; top:10px; left:50%;
+  transform:translateX(-50%); width:5px; height:8px;
+  background:#a0182a; opacity:.9;}
+@keyframes ofudaFall{
+  0%{transform:translateY(0) rotate(-4deg); opacity:0}
+  6%{opacity:.55}
+  75%{opacity:.3}
+  100%{transform:translateY(132vh) rotate(var(--rot,160deg)); opacity:0}
+}
+/* 不意に走る悪寒（周期性の走査線フラッシュ） */
+#chill{position:fixed; inset:0; z-index:70; pointer-events:none; overflow:hidden; opacity:0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 2px, transparent 2px 6px),
+    radial-gradient(90% 90% at 50% 40%, rgba(224,32,60,.10), transparent 70%);}
+#chill.go{animation:chillGo .36s steps(7) both}
+@keyframes chillGo{
+  0%{opacity:0; transform:translateX(0) skewX(0)}
+  12%{opacity:.8; transform:translateX(-7px) skewX(-2deg)}
+  26%{opacity:.35; transform:translateX(5px) skewX(0)}
+  42%{opacity:.85; transform:translateX(-3px) skewX(1.8deg)}
+  60%{opacity:.3}
+  78%{opacity:.55}
+  100%{opacity:0; transform:none}
+}
 
-        /* 入场动画：3. 光晕颤抖效果 */
-        @keyframes flicker {
-            0%, 19%, 21%, 23%, 80%, 100% { opacity: 0.99; text-shadow: 0 0 30px #c0392b; }
-            20%, 22%, 82% { opacity: 0.4; text-shadow: none; }
-        }
+/* ============================================================
+   4. 本文レイアウト
+============================================================ */
+#stage{position:relative; z-index:10; height:100%; display:flex; flex-direction:column;
+  justify-content:flex-start; align-items:center; text-align:center;
+  padding:3vh 4vw 24vh; /* 下は扉ボタンのための空間 */}
+/* 左右の縦書き・怪談の端書き（書道体で静かに） */
+.tate{position:fixed; top:50%; z-index:20; writing-mode:vertical-rl;
+  font-family:"Yuji Syuku","Shippori Mincho",serif; font-weight:400;
+  font-size:.9rem; letter-spacing:.56em; color:var(--mist);
+  opacity:0; transition:opacity 2s ease 1.6s, transform 2s cubic-bezier(.2,.7,.2,1) 1.6s;
+  text-shadow:0 0 8px rgba(0,0,0,.9); pointer-events:none; white-space:nowrap;}
+#tateL{left:3.6vw; transform:translateY(-50%) translateX(-10px)}
+#tateR{right:3.6vw; transform:translateY(-50%) translateX(10px)}
+#tateL.in{opacity:.55; transform:translateY(-50%) translateX(0)}
+#tateR.in{opacity:.4; transform:translateY(-50%) translateX(0)}
+#tateR .red{color:var(--blood); text-shadow:0 0 14px rgba(224,32,60,.5)}
 
-        .title, .subtitle {
-            animation: flicker 3s infinite;
-        }
+/* ---- 会場銘（文化祭名の掲示） ---- */
+.festHead{opacity:0; transform:translateY(-8px);
+  transition:opacity 1.4s ease 1.05s, transform 1.4s cubic-bezier(.2,.8,.2,1) 1.05s;}
+.festHead.in{opacity:1; transform:none}
+.eyebrow{font-family:"DotGothic16",monospace; font-size:clamp(.58rem,.92vw,.8rem);
+  letter-spacing:.68em; text-indent:.68em; color:var(--mist); opacity:.9;}
+.festName{margin-top:1.1vh; font-family:"Kaisei Tokumin","Yuji Syuku",serif; font-weight:900;
+  font-size:clamp(1.2rem,2.9vw,2.5rem); letter-spacing:.4em; text-indent:.4em;
+  line-height:1.4; color:#e9d8ae;
+  text-shadow:0 2px 4px rgba(0,0,0,.95), 0 0 30px rgba(255,170,70,.16);}
 
-        @keyframes fadeInAndBleed {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(10px); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
-        }
+/* ============================================================
+   主タイトル「こっくりさんからの脱出」－ 深夜の掛け軸
+   背景を隠しすぎないよう、前よりひと回り小さく置く
+   ・こっくりさん … 紙面に墨書（大字）
+   ・からの脱出 … 主文のすぐ右に縦書きで添える（脱出のみ朱）
+   ・「呪」の朱印 … 落款の下
+   ・紙は中央から左右に開く（巻物の展開）
+   ・ぼかしは使わず「滲み出る／チカチカ灯る」演出にする
+============================================================ */
+.kakejiku{width:min(72vw,700px); position:relative;
+  opacity:0; transform:translateY(6px);
+  animation:axisIn .7s cubic-bezier(.2,.9,.25,1) forwards; animation-delay:1.1s;
+  filter:drop-shadow(0 14px 36px rgba(0,0,0,.55));
+  transform-style:preserve-3d; will-change:transform;}
+@keyframes axisIn{
+  from{opacity:0; transform:translateY(14px)}
+  to{opacity:1; transform:none}
+}
+/* 木軸（上下） */
+.axisTop,.axisBottom{position:relative; height:10px;
+  background:linear-gradient(180deg,#33200f,#0d0703 55%,#241307);
+  border-radius:2px; box-shadow:0 2px 3px rgba(0,0,0,.5);}
+.axisTop i,.axisBottom i{position:absolute; top:50%; transform:translateY(-50%);
+  width:17px; height:17px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#6b4320,#241106 68%);
+  box-shadow:0 1px 3px rgba(0,0,0,.7);}
+.axisTop i:first-child,.axisBottom i:first-child{left:-8px}
+.axisTop i:last-child,.axisBottom i:last-child{right:-8px}
+/* 和紙の紙面：中央から左右へ開く */
+.paper{position:relative; overflow:hidden;
+  clip-path:inset(0 54% 0 54%); opacity:0;
+  animation:paperUnroll 1.1s cubic-bezier(.22,.7,.26,1) 1.05s forwards;
+  background:
+    radial-gradient(120% 90% at 12% 8%, rgba(255,246,220,.55), transparent 42%),
+    radial-gradient(90% 70% at 90% 92%, rgba(214,198,166,.5), transparent 55%),
+    linear-gradient(160deg,#efe6cd 0%,#e6d9b8 46%,#dccda6 100%);
+  box-shadow:inset 0 0 34px rgba(112,86,48,.28), 0 1px 0 rgba(255,250,235,.6) inset;
+  transition:filter 4s ease;}
+@keyframes paperUnroll{
+  0%{clip-path:inset(0 54% 0 54%); opacity:0}
+  45%{opacity:1}
+  100%{clip-path:inset(0 0 0 0); opacity:1}
+}
+.paper::before{content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    repeating-linear-gradient(4deg, rgba(90,70,40,.028) 0 2px, transparent 2px 9px),
+    radial-gradient(40% 26% at 20% 70%, rgba(110,82,40,.16), transparent 60%),
+    radial-gradient(30% 20% at 78% 24%, rgba(110,82,40,.13), transparent 60%),
+    radial-gradient(26% 16% at 62% 82%, rgba(120,88,40,.10), transparent 60%);}
+/* 血の染み・滲み（段階を踏んで濃くなる） */
+.stain{position:absolute; inset:0; opacity:0; transition:opacity 5s ease; pointer-events:none;
+  background:
+    radial-gradient(30% 20% at 26% 58%, rgba(150,16,34,.26), transparent 62%),
+    radial-gradient(20% 14% at 70% 24%, rgba(150,16,34,.2), transparent 60%),
+    radial-gradient(36% 22% at 84% 78%, rgba(130,12,30,.26), transparent 64%),
+    radial-gradient(85% 26% at 50% 108%, rgba(115,10,28,.6), transparent 72%);}
+body.warn .stain{opacity:.25}
+body.cursed .stain{opacity:1}
+/* 紙を覆う血の気（呪縛後の全体の濁り） */
+.paper::after{content:""; position:absolute; inset:0; opacity:0; pointer-events:none;
+  transition:opacity 7s ease;
+  background:
+    radial-gradient(70% 46% at 34% 24%, rgba(190,30,46,.14), transparent 60%),
+    radial-gradient(60% 42% at 74% 78%, rgba(160,20,40,.2), transparent 62%),
+    linear-gradient(180deg, rgba(120,12,30,.06), rgba(120,12,30,.2) 88%, rgba(96,8,24,.42) 100%);}
+body.cursed .paper::after{opacity:1}
+/* 紙の中のレイアウト：主文と落款は一つの塊として中央に */
+.paperBody{position:relative; display:flex; align-items:center; justify-content:center;
+  gap:clamp(4px,1.1vw,16px); padding:14px 16px 4px;}
+.mainCol{flex:0 1 auto; min-width:0}
+h1{font-family:"Yuji Mai","Kaisei Tokumin",serif; font-weight:400;
+  font-size:clamp(1.7rem,5.3vw,5.6rem);
+  line-height:1.14; letter-spacing:.02em; color:#241707; text-align:left;
+  text-shadow:0 1px 0 rgba(255,250,235,.7), 1px 2px 2px rgba(60,35,10,.3);}
+/* 縦書き落款：主文に寄り添う */
+.sideCol{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:6px;}
+.tateLine{writing-mode:vertical-rl; white-space:nowrap; font-size:0;}
+.tateLine .ch{display:inline-block; margin:.03em 0; line-height:1.02;}
+.tateLine .cPa{font-size:clamp(.6rem,1vw,.84rem); letter-spacing:.1em;
+  color:#6a5638; opacity:.95;}
+.tateLine .cEsc{font-size:clamp(.78rem,1.38vw,1.16rem); color:#a30f1e; font-weight:600;}
+/* 朱印「呪」：パチンと押す（ぼかさない） */
+.sealPaper{writing-mode:horizontal-tb; font-family:"Yuji Syuku","Kaisei Tokumin",serif;
+  font-weight:700; font-size:clamp(.56rem,.95vw,.8rem); color:#a30f1e; line-height:1;
+  border:1.7px solid rgba(163,15,30,.85); padding:.15em .18em .08em;
+  margin-top:6px; transform:rotate(-6deg);
+  opacity:0; animation:paperStamp .38s cubic-bezier(.2,1.8,.4,1) forwards; animation-delay:3.55s;}
+@keyframes paperStamp{from{opacity:0; transform:rotate(-11deg) scale(1.8)}to{opacity:1; transform:rotate(-6deg) scale(1)}}
+/* 紙の下辺の詞 */
+.inkNote{position:relative; text-align:center; padding:0 0 10px;
+  font-family:"Yuji Syuku","Shippori Mincho",serif; font-weight:500;
+  font-size:clamp(.56rem,.95vw,.78rem); letter-spacing:.5em; text-indent:.5em;
+  color:#6b5636; opacity:0; animation:softUp 1s ease-out forwards; animation-delay:4.2s;}
+/* 墨字の一字：滲みは使わず、すっと現れる */
+.ch{position:relative; display:inline-block; opacity:0; will-change:transform;
+  transform:translateY(.1em);}
+.ch::after{content:attr(data-c); position:absolute; left:1px; top:-1px; z-index:-1;
+  color:rgba(120,30,40,.08);}
+.cMain{animation:charIn .8s ease-out forwards; animation-delay:var(--d,1.9s);}
+.cPa{animation:softUp .8s ease-out forwards; animation-delay:var(--d,2.6s);}
+/* 朱字は「チカチカ灯りながら定着する」 */
+.cEsc{animation:escFlicker 1.1s steps(1,end) forwards; animation-delay:var(--d,3s);}
+@keyframes softUp{to{opacity:1; transform:translateY(0)}}
+@keyframes charIn{to{opacity:1; transform:translateY(0)}}
+@keyframes escFlicker{
+  0%{opacity:0}
+  9%{opacity:1; color:#e64855}
+  20%{opacity:.2}
+  31%{opacity:1; color:#cf2233}
+  42%{opacity:.35}
+  55%{opacity:1; color:#b51a2a}
+  68%{opacity:.6}
+  82%{opacity:1; color:#aa1424}
+  100%{opacity:1; color:#a30f1e}
+}
+/* 三つの段階：暖色の予感 → 墨が血へ → 血の染みが広がる */
+body.warn .paper{filter:sepia(.28) saturate(1.22)}
+body.warn .cMain{animation:txtShiver .5s linear 1}
+body.warn .inkNote{color:#7a4a2a}
+body.cursed .paper{filter:sepia(.12) hue-rotate(-13deg) saturate(1.42) brightness(.97)}
+body.cursed .cMain{color:#7d1420; text-shadow:0 1px 0 rgba(255,235,220,.35), 0 4px 9px rgba(140,16,32,.3)}
+body.cursed .tateLine .cPa{color:#6e2c2a}
+body.cursed .tateLine .cEsc{color:#e62a3a; text-shadow:0 0 10px rgba(230,42,58,.6)}
+body.cursed .sealPaper{color:#ff1f30; border-color:rgba(255,31,48,.9);
+  box-shadow:0 0 16px rgba(255,31,48,.45)}
+body.cursed .inkNote{color:#7a2220}
+body.cursed .mainCol{animation:txtShiver .42s linear 2}
+@keyframes txtShiver{
+  0%,100%{transform:translateX(0)}
+  30%{transform:translateX(-1.5px)}
+  60%{transform:translateX(1.3px)}
+}
 
-        /* 鼠标跟随：黑色雾气（模拟手部阴影） */
-        #cursor-shadow {
-            position: absolute;
-            width: 100px; 
-            height: 100px;
-            background: radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 70%);
-            pointer-events: none; /* 允许穿透继续点击 */
-            z-index: 5;
-            filter: blur(15px);
-            transform: translate(-50%, -50%);
-        }
-    </style>
+/* ---- 導入文（旧校舎の怪談）
+   序ノ一・序ノ二は「開く前」の導入として開幕から読める。
+   扉を開ける（.play）と、続きの 序ノ三〜五 が語られる。
+   スペースは最初から確保して、レイアウトが跳ねないようにする ---- */
+.story{margin-top:1.5vh; max-width:min(620px,84vw);
+  font-size:clamp(.82rem,1.1vw,.95rem); line-height:1.9;
+  letter-spacing:.07em; color:var(--paper-dim);
+  text-shadow:0 2px 10px rgba(0,0,0,.9);}
+/* 序ノ一・序ノ二（開幕で出現） */
+.story .line{opacity:0; transform:translateY(12px);}
+.story .line.intro{animation:lineIn 1.2s ease forwards; animation-delay:var(--d,3.4s);}
+/* 続きは扉を開けてから */
+.story .later{visibility:hidden}
+.story.play .later{visibility:visible}
+.story.play .later.line{animation:lineIn 1.15s ease forwards; animation-delay:var(--d,3.4s);}
+.story.play .later.mid{animation:lineIn 1s ease forwards; animation-delay:var(--d,3.4s);}
+.story .line + .line{margin-top:.85em}
+.story .no{font-family:"DotGothic16",monospace; font-size:.62em;
+  letter-spacing:.26em; margin-right:.95em; vertical-align:.14em;
+  color:#8b93b0; opacity:.85;}
+.story .mid{margin:1.1vh auto 1.2vh; font-size:.62rem; letter-spacing:1.2em;
+  text-indent:1.2em; color:#5c6380; opacity:0;}
+@keyframes lineIn{to{opacity:1; transform:translateY(0); filter:blur(0)}}
+.story .hl{color:var(--blood); font-weight:700;
+  text-shadow:0 0 16px rgba(224,32,60,.45);}
+body.cursed .story .hl{animation:hlPulse 1.1s ease-in-out infinite}
+@keyframes hlPulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ---- 扉ボタン（画面の足元に固定・本文が伸びても動かない） ---- */
+.doorArea{position:fixed; left:0; right:0; bottom:0; z-index:30;
+  display:flex; flex-direction:column; align-items:center; gap:1vh;
+  padding-bottom:2.1vh; pointer-events:none}
+#door, .venue{pointer-events:auto}
+#door{font-family:"Kaisei Tokumin",serif; font-weight:700;
+  font-size:clamp(1rem,1.7vw,1.35rem); letter-spacing:.42em; text-indent:.42em;
+  color:var(--paper); background:transparent;
+  border:1px solid rgba(224,32,60,.65); outline:none; cursor:pointer;
+  padding:1.05em 2.6em 1.05em 3.02em;
+  position:relative; overflow:hidden;
+  opacity:0; animation:doorIn .9s cubic-bezier(.2,1.4,.3,1) forwards; animation-delay:6.5s;
+  transition:color .3s, border-color .3s, box-shadow .3s;
+  box-shadow:0 0 0 rgba(224,32,60,0), inset 0 0 0 rgba(224,32,60,0);}
+@keyframes doorIn{from{opacity:0; transform:scale(.86)}to{opacity:1; transform:scale(1)}}
+#door::before{ /* ボタンを流れる光 */
+  content:""; position:absolute; top:0; bottom:0; width:34%; left:-40%;
+  background:linear-gradient(100deg,transparent, rgba(255,180,94,.24), transparent);
+  transform:skewX(-22deg); transition:left .9s ease;}
+#door:hover{color:#fff; border-color:var(--ember);
+  box-shadow:0 0 26px rgba(224,32,60,.4), inset 0 0 18px rgba(224,32,60,.25);}
+#door:hover::before{left:120%}
+#door.danger{color:#ffb9ae; border-color:var(--blood); animation:doorShake .45s linear 2}
+@keyframes doorShake{
+  0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+#door.opened{color:var(--ember); border-color:var(--ember);
+  box-shadow:0 0 34px rgba(255,180,94,.35); animation:none; cursor:default}
+.whisper{font-family:"DotGothic16",monospace; font-size:.78rem; letter-spacing:.28em;
+  color:var(--blood); opacity:0; transition:opacity .7s ease; height:1.2em;
+  text-shadow:0 0 12px rgba(224,32,60,.5)}
+.whisper.in{opacity:1}
+.whisper.pale{color:var(--mist); opacity:.75}
+
+/* ---- 場所・制作の銘 ---- */
+.venue{margin-bottom:2.4vh; font-size:clamp(.56rem,.92vw,.78rem);
+  letter-spacing:.34em; text-indent:.34em; color:#8d94ae;
+  opacity:0; animation:doorIn 1s ease forwards; animation-delay:6s;}
+.venue .sep{margin:0 .6em; color:#4c5368}
+
+/* ---- 警告（1度目）～血の呪縛（2度目）
+   全体を塗りつぶすのではなく「場面の細部」が血に染まる演出にする。
+   空や形は残して、絵が読める状態を保つ ---- */
+#fxTint{position:fixed; inset:0; z-index:5; pointer-events:none; opacity:0;
+  background:radial-gradient(90% 90% at 50% 45%, rgba(150,30,40,0) 0%, rgba(40,6,16,0) 70%, rgba(10,2,6,0) 100%);
+  transition:opacity 3s ease;}
+body.warn #fxTint{opacity:1;
+  background:radial-gradient(90% 90% at 50% 45%, rgba(190,70,55,.10) 0%, rgba(120,32,42,.22) 55%, rgba(30,6,14,.4) 100%);}
+body.cursed #fxTint{opacity:1;
+  background:radial-gradient(95% 95% at 50% 42%, rgba(205,36,52,.16) 0%, rgba(120,16,36,.34) 52%, rgba(22,2,10,.5) 100%);}
+/* 全体はほんの少し鮮やかにするだけ（見え方を保つ） */
+#bgScene{transition:filter 5s ease}
+body.cursed #bgScene{filter:saturate(1.22) brightness(1.02)}
+/* 血の月 */
+#bloodMoon{opacity:0; transition:opacity 5s ease}
+body.cursed #bloodMoon{opacity:.92}
+/* 校舎の明かり：橙の灯り→血の灯りへ */
+.win{transition:fill 4s ease}
+body.cursed .win{fill:#ff5a48}
+body.cursed #doorHole{fill:#a02030; transition:fill 4s ease}
+/* 提灯の灯りも血の色へ */
+.lampB{transition:fill 4s ease}
+.lampG{transition:fill 4s ease}
+body.cursed .lampB{fill:#e8432e}
+body.cursed .lampG{fill:#ff6a52}
+/* 鳥居は暗紅から、より「血の朱」へ */
+#torii-far, #torii-mid, #torii-near{transition:fill 6s ease}
+body.cursed #torii-far{fill:#54101e}
+body.cursed #torii-mid{fill:#5e1222}
+body.cursed #torii-near{fill:#3c0a16}
+/* 立ち込める霧・黒気も血の色を帯びる */
+.mistBand{transition:background 5s ease}
+body.cursed .mistBand{background:radial-gradient(50% 100% at 50% 100%, rgba(196,40,56,.34), transparent 70%);}
+.fog{transition:background 5s ease}
+body.cursed .fog{background:radial-gradient(55% 60% at 50% 100%, rgba(78,10,20,.92), transparent 72%);}
+body.warn .cMain::after{color:rgba(255,150,96,.4); left:3px}
+body.cursed .story{color:#e8cfc4}
+
+/* ---- 残り時間 ---- */
+#timerBox{position:fixed; top:3vh; right:2.6vw; z-index:30; text-align:right;
+  opacity:0; transform:translateY(-6px); transition:opacity 1s ease, transform 1s ease;
+  pointer-events:none}
+#timerBox.in{opacity:1; transform:none}
+#timerLabel{font-family:"DotGothic16",monospace; font-size:.7rem; letter-spacing:.4em;
+  color:var(--blood); text-shadow:0 0 10px rgba(224,32,60,.6)}
+#timer{font-family:"DotGothic16",monospace; font-size:clamp(1.5rem,3vw,2.4rem);
+  color:#ff8d86; letter-spacing:.12em; text-shadow:0 0 18px rgba(224,32,60,.7);
+  font-variant-numeric:tabular-nums}
+body.cursed #timer{animation:blinkTime 1s steps(2) infinite}
+@keyframes blinkTime{50%{opacity:.35}}
+
+/* 呪いの瞬間フラッシュ */
+#sealFlash{position:fixed; inset:0; z-index:80; pointer-events:none;
+  background:radial-gradient(60% 60% at 50% 45%, rgba(224,32,60,.5), rgba(120,4,16,.85));
+  opacity:0}
+body.cursed #sealFlash{animation:flashOut 1.5s ease-out forwards}
+@keyframes flashOut{0%{opacity:1}100%{opacity:0}}
+/* 「呪」の大きな印 */
+#seal{position:fixed; left:50%; top:42%; z-index:81; pointer-events:none;
+  font-family:"Kaisei Tokumin",serif; font-weight:900;
+  font-size:clamp(6rem,22vw,20rem); color:rgba(224,32,60,.85);
+  opacity:0; transform:translate(-50%,-50%) scale(2.4) rotate(-8deg);
+  text-shadow:0 0 44px rgba(224,32,60,.7)}
+body.cursed #seal{animation:sealStamp 1.1s cubic-bezier(.1,1.6,.3,1) forwards}
+@keyframes sealStamp{0%{opacity:0; transform:translate(-50%,-50%) scale(2.4) rotate(-14deg)}
+  55%{opacity:.9; transform:translate(-50%,-50%) scale(.98) rotate(-8deg)}
+  100%{opacity:0; transform:translate(-50%,-50%) scale(1) rotate(-8deg)}}
+
+/* ---- フッター ---- */
+.credit{position:fixed; bottom:1.6vh; left:2vw; right:2vw; z-index:30;
+  display:flex; justify-content:space-between; gap:1em;
+  font-size:.62rem; letter-spacing:.22em; color:#5d647c; opacity:0; transition:opacity 2s ease 6.8s;}
+body.cursed .credit, .credit.in{opacity:.85}
+.credit b{color:#7d849e; font-weight:500}
+
+/* ============================================================
+   5. マウスフォロー（狐火）
+============================================================ */
+#fxLayer{position:fixed; inset:0; z-index:60; pointer-events:none; overflow:hidden}
+.foxfire{position:absolute; border-radius:50%; mix-blend-mode:screen; will-change:transform;
+  transform:translate(-50%,-50%);}
+#fxCore{width:26px; height:26px; background:radial-gradient(circle, #eaffff 0%, #9adcff 38%, rgba(90,170,255,0) 72%);
+  filter:blur(1px) drop-shadow(0 0 12px rgba(120,205,255,.9))}
+#fxHalo{width:150px; height:150px; background:radial-gradient(circle, rgba(154,220,255,.22) 0%, rgba(60,120,220,.10) 40%, transparent 70%)}
+.trailDot{position:absolute; width:var(--s,9px); height:var(--s,9px);
+  background:radial-gradient(circle, rgba(170,225,255,.9) 0%, rgba(120,60,190,0) 72%);
+  opacity:var(--o,.7); mix-blend-mode:screen; border-radius:50%;
+  transform:translate(-50%,-50%);}
+#fxRipple{position:absolute; width:6px; height:6px; left:-20px; top:-20px;
+  border:1.5px solid rgba(224,32,60,.75); border-radius:50%; opacity:0}
+#fxRipple.pop{animation:rippleGo .9s ease-out forwards}
+@keyframes rippleGo{0%{opacity:.9; width:6px; height:6px}
+  100%{opacity:0; width:190px; height:190px}}
+
+/* ============================================================
+   6. タブレット/モバイル（ポインタなし）調整
+============================================================ */
+@media (max-width:760px){
+  .tate{display:none}
+  #story{max-width:94vw}
+  #timerBox{top:2.4vh; right:4vw}
+  .curtain{width:56vw}
+  .credit{flex-direction:column; gap:.5em; align-items:center;
+    font-size:.48rem; letter-spacing:.14em; bottom:1.1vh}
+  .festName{font-size:clamp(1.1rem,5.4vw,1.8rem)}
+  #stage{padding:2vh 3vw}
+}
+/* 低い窓（iframe埋め込みなど）では間隔を詰めて収める */
+@media (max-height:660px){
+  #stage{padding:1.6vh 4vw 21vh}
+  .festHead{display:none}
+  .story{line-height:1.95; margin-top:1.4vh}
+  .story .line + .line{margin-top:.7em}
+  .story .mid{margin:1vh auto 1.2vh}
+  h1{line-height:1.02}
+}
+@media (pointer:coarse){ #fxLayer{display:none} }
+/* アニメーション抑止ユーザー向け */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important; animation-delay:0s !important; transition-duration:.01ms !important}
+}
+</style>
 </head>
 <body>
 
-    <!-- 背景图：请替换为在 BOOTH 购买的合法或免费的こっくりさん背景素材 [citation:1][citation:13] -->
-    <img id="bg-anim" src="https://via.placeholder.com/1920x1080/000000/000000?text=Background+Asset" alt="">
+<!-- 背景一式（専用レイヤー・画面からはみ出さない） -->
+<div id="fxBack">
+<!-- ============================================================
+   背景：自作ベクター（旧校舎と千本鳥居の夜）
+   ★背景を差し替えたい場合★
+   1) この <svg> を削除し、代わりに <img src="あなたの画像.jpg"> を置く
+   2) または上記 :root の配色で写真に被せる夜フィルターを調整する
+============================================================ -->
+<svg id="bgScene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#04060e"/>
+      <stop offset=".45" stop-color="#0a0e21"/>
+      <stop offset=".72" stop-color="#1a1433"/>
+      <stop offset="1"   stop-color="#301528"/>
+    </linearGradient>
+    <radialGradient id="moonGrad" cx=".38" cy=".34" r=".9">
+      <stop offset="0"  stop-color="#fdf8e6"/>
+      <stop offset=".6" stop-color="#eaddb6"/>
+      <stop offset="1"  stop-color="#c9b993"/>
+    </radialGradient>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#f4e9c8" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#f4e9c8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lampGrad" cx=".5" cy=".22" r=".9">
+      <stop offset="0"  stop-color="#ffe9b0"/>
+      <stop offset=".55" stop-color="#ffb45e"/>
+      <stop offset="1"  stop-color="#d9712f"/>
+    </radialGradient>
+    <radialGradient id="foxEye" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ff8a7a" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#ff2b1e" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#ff2b1e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="2.4"/></filter>
+  </defs>
 
-    <!-- 鼠标跟随特效的图层 -->
-    <div id="cursor-shadow"></div>
+  <!-- 空 -->
+  <rect width="1600" height="900" fill="url(#skyGrad)"/>
 
-    <div class="title-box">
-        <div class="title">こっくりさんからの脱出</div>
-        <div class="subtitle">～次はお前だ～</div>
-        <div class="subtitle" style="font-size: 0.8rem; margin-top: 20px;">ようこそ、開けてはいけない文化祭へ。</div>
+  <!-- 星 -->
+  <g fill="#dfe6ff">
+    <circle cx="120"  cy="70"  r="1.1" opacity=".7"/>
+    <circle cx="240"  cy="150" r=".7"  opacity=".5"/>
+    <circle cx="330"  cy="55"  r="1.4" opacity=".8"><animate attributeName="opacity" values=".8;.2;.8" dur="4s" repeatCount="indefinite"/></circle>
+    <circle cx="470"  cy="120" r=".6"  opacity=".45"/>
+    <circle cx="560"  cy="60"  r=".9"  opacity=".6"/>
+    <circle cx="660"  cy="170" r=".6"  opacity=".4"/>
+    <circle cx="740"  cy="70"  r="1.2" opacity=".7"><animate attributeName="opacity" values=".7;.15;.7" dur="5.2s" repeatCount="indefinite"/></circle>
+    <circle cx="70"   cy="230" r=".6"  opacity=".4"/>
+    <circle cx="830"  cy="140" r=".7"  opacity=".5"/>
+    <circle cx="150"  cy="320" r=".8"  opacity=".4"/>
+    <circle cx="940"  cy="90"  r=".6"  opacity=".5"/>
+    <circle cx="1020" cy="200" r=".9"  opacity=".55"/>
+    <circle cx="360"  cy="240" r=".6"  opacity=".4"/>
+    <circle cx="520"  cy="280" r="1"   opacity=".55"><animate attributeName="opacity" values=".55;.1;.55" dur="6.4s" repeatCount="indefinite"/></circle>
+    <circle cx="690"  cy="320" r=".7"  opacity=".4"/>
+    <circle cx="1100" cy="60"  r=".8"  opacity=".6"/>
+    <circle cx="1380" cy="90"  r="1.2" opacity=".7"/>
+    <circle cx="1520" cy="170" r=".7"  opacity=".5"/>
+    <circle cx="1460" cy="60"  r=".6"  opacity=".4"/>
+    <circle cx="1180" cy="140" r=".8"  opacity=".4"/>
+    <circle cx="880"  cy="40"  r=".7"  opacity=".5"/>
+    <circle cx="60"   cy="430" r=".6"  opacity=".35"/>
+    <circle cx="1580" cy="420" r=".6"  opacity=".35"/>
+    <circle cx="1330" cy="240" r=".7"  opacity=".45"/>
+    <circle cx="900"  cy="230" r=".6"  opacity=".4"/>
+    <circle cx="480"  cy="420" r=".6"  opacity=".3"/>
+    <circle cx="1230" cy="40"  r=".5"  opacity=".6"/>
+    <circle cx="750"  cy="380" r=".5"  opacity=".3"/>
+  </g>
+
+  <!-- 月と暈（右上方・タイトルと重ならないよう高く寄せる） -->
+  <g transform="translate(90,-52)">
+    <circle cx="1210" cy="195" r="300" fill="url(#halo)">
+      <animate attributeName="opacity" values="1;.7;1" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1210" cy="195" r="148" fill="url(#moonGrad)"/>
+    <circle id="bloodMoon" cx="1210" cy="195" r="148" fill="#d41f3a" opacity="0"/>
+    <g fill="#cdbd95" opacity=".45">
+      <circle cx="1160" cy="170" r="17"/>
+      <circle cx="1245" cy="235" r="12"/>
+      <circle cx="1238" cy="140" r="7"/>
+      <circle cx="1145" cy="225" r="6"/>
+    </g>
+    <!-- 月を隠す暗雲 -->
+    <g fill="#0a0d1e" opacity=".92">
+      <circle cx="1060" cy="252" r="150"/>
+      <circle cx="1215" cy="290" r="175"/>
+      <circle cx="1360" cy="238" r="135"/>
+      <circle cx="1180" cy="340" r="160"/>
+      <circle cx="1470" cy="330" r="115"/>
+    </g>
+  </g>
+
+  <!-- 山なみ -->
+  <path d="M0,600 L190,556 L420,612 L700,558 L980,616 L1240,562 L1600,612 L1600,690 L0,690 Z"
+        fill="#232041" opacity=".5"/>
+  <path d="M0,648 L260,600 L520,655 L840,602 L1140,660 L1440,606 L1600,648 L1600,790 L0,790 Z"
+        fill="#181535" opacity=".85"/>
+
+  <!-- 旧校舎（鐘楼つき） -->
+  <g id="school">
+    <!-- 屋根・塔 -->
+    <path d="M988,514 L1030,452 L1072,514 Z" fill="#0d0f24"/>
+    <rect x="996" y="514" width="68" height="150" fill="#101328"/>
+    <circle cx="1030" cy="492" r="13" fill="none" stroke="#6f769e" stroke-width="2"/>
+    <line x1="1030" y1="492" x2="1030" y2="483" stroke="#6f769e" stroke-width="1.6"/>
+    <line x1="1030" y1="492" x2="1036" y2="496" stroke="#6f769e" stroke-width="1.6"/>
+    <!-- 塔の窓 -->
+    <rect x="1024" y="542" width="12" height="52" fill="#05070f"/>
+    <circle cx="1030" cy="556" r="2" fill="#ffcf8a" opacity=".8"/>
+    <circle cx="1030" cy="576" r="2" fill="#ffcf8a" opacity=".45"/>
+    <!-- 主屋 -->
+    <path d="M1006,540 L1128,478 L1252,540 Z" fill="#0b0d21"/>
+    <rect x="1036" y="538" width="196" height="126" fill="#12162f"/>
+    <!-- 主屋の窓（明かりが点く窓と点かない窓） -->
+    <g>
+      <rect x="1058" y="562" width="15" height="24" fill="#05070f"/>
+      <rect class="win" x="1102" y="562" width="15" height="24" fill="#ffcf8a" opacity=".55"/>
+      <rect x="1146" y="562" width="15" height="24" fill="#05070f"/>
+      <rect class="win" x="1190" y="562" width="15" height="24" fill="#ffcf8a" opacity=".3"/>
+      <rect class="win" x="1058" y="606" width="15" height="24" fill="#ffcf8a" opacity=".4"/>
+      <rect x="1102" y="606" width="15" height="24" fill="#05070f"/>
+      <rect class="win" x="1146" y="606" width="15" height="24" fill="#ffcf8a" opacity=".6"/>
+      <rect x="1190" y="606" width="15" height="24" fill="#05070f"/>
+    </g>
+    <!-- 入口の扉（開いた暗い穴・呪いが解けると内側が紅い光を放つ） -->
+    <rect id="doorHole" x="1090" y="618" width="88" height="46" fill="#04050c"/>
+    <rect x="1090" y="618" width="88" height="46" fill="none" stroke="#2a3050" stroke-width="2"/>
+    <!-- 平屋 -->
+    <path d="M1246,578 L1300,544 L1360,578 Z" fill="#0a0c1f"/>
+    <rect x="1252" y="578" width="112" height="86" fill="#0f1229"/>
+    <rect class="win" x="1272" y="608" width="16" height="24" fill="#ffcf8a" opacity=".5"/>
+    <rect x="1322" y="608" width="16" height="24" fill="#05070f"/>
+  </g>
+
+  <!-- 千本鳥居（遠・中・近＝奥行き） -->
+  <g id="torii-far" fill="#250a12" opacity=".95">
+    <rect x="360" y="552" width="9" height="112"/>
+    <rect x="429" y="552" width="9" height="112"/>
+    <rect x="352" y="546" width="94" height="9"/>
+    <rect x="367" y="576" width="64" height="6"/>
+  </g>
+  <g id="torii-mid" fill="#300b17">
+    <rect x="200" y="600" width="14" height="186"/>
+    <rect x="352" y="600" width="14" height="186"/>
+    <rect x="184" y="586" width="198" height="13"/>
+    <rect x="212" y="626" width="142" height="9"/>
+    <!-- 鳥居の奥に光る狐の眼（まばたきながらじっと見つめる） -->
+    <g>
+      <animate attributeName="opacity" keyTimes="0;0.42;0.5;0.64;0.72;0.9;1"
+        values="0;0;1;1;0;0;0" dur="9s" begin="5s" repeatCount="indefinite"/>
+      <circle cx="268" cy="704" r="14" fill="url(#foxEye)"/>
+      <circle cx="300" cy="704" r="14" fill="url(#foxEye)"/>
+      <ellipse cx="270" cy="703" rx="3.2" ry="1.6" fill="#ffd9c0"/>
+      <ellipse cx="298" cy="703" rx="3.2" ry="1.6" fill="#ffd9c0"/>
+    </g>
+  </g>
+  <g id="torii-near" fill="#18060a">
+    <rect x="10"  y="600" width="26" height="320"/>
+    <rect x="252" y="600" width="26" height="320"/>
+    <rect x="-22" y="578" width="330" height="22"/>
+    <rect x="28"  y="636" width="232" height="13"/>
+    <!-- 提灯（揺れる） -->
+    <g>
+      <g>
+        <animateTransform attributeName="transform" type="rotate"
+          values="0 143 664;4 143 664;0 143 664;-4 143 664;0 143 664" dur="6s" repeatCount="indefinite"/>
+        <circle class="lampG" cx="143" cy="668" r="52" fill="url(#halo)" opacity=".5"/>
+        <line x1="143" y1="650" x2="143" y2="674" stroke="#caa06a" stroke-width="2"/>
+        <rect class="lampB" x="134" y="674" width="18" height="26" rx="6" fill="url(#lampGrad)"/>
+        <rect x="132" y="668" width="22" height="8" rx="3" fill="#7c5228"/>
+        <line x1="143" y1="700" x2="143" y2="712" stroke="#caa06a" stroke-width="1.4"/>
+        <circle cx="143" cy="702" r="2.6" fill="#caa06a"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- 右手前の枯れ木と鴉 -->
+  <g stroke="#05060c" stroke-width="13" stroke-linecap="round" fill="none">
+    <path d="M1525,980 C1512,850 1468,770 1418,688 C1402,660 1392,638 1396,616"/>
+  </g>
+  <g stroke="#05060c" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M1418,688 C1448,662 1472,648 1502,632"/>
+    <path d="M1446,718 C1470,700 1480,686 1486,668"/>
+    <path d="M1396,616 C1390,596 1382,584 1370,572"/>
+    <path d="M1502,632 C1512,622 1524,618 1532,612"/>
+  </g>
+  <!-- 鴉 -->
+  <g fill="#04050a">
+    <path d="M1508,616 q7,4 5,13 q-3,6 -10,4 q6,-3 5,-8 q-8,3 -6,-7 q4,-5 6,-2 Z"/>
+    <path d="M1470,690 q6,3 4,11 q-3,5 -8,3 q5,-2 4,-7 q-6,2 -5,-6 q3,-4 5,-1 Z"/>
+  </g>
+
+  <!-- 地面の黒帯（手前） -->
+  <rect x="0" y="824" width="1600" height="120" fill="#02030a"/>
+</svg>
+
+<div id="blueNight"></div>
+<div id="fxTint"></div>
+<div id="mistWrap">
+  <div class="mistBand a"></div>
+  <div class="mistBand b"></div>
+  <div class="fog" style="left:6%;  animation-delay:0s"></div>
+  <div class="fog" style="left:34%; animation-delay:4s; opacity:.8"></div>
+  <div class="fog" style="left:64%; animation-delay:8s"></div>
+  <div class="fog" style="left:84%; animation-delay:2s; opacity:.6"></div>
+</div>
+<div id="film"></div>
+</div><!-- /fxBack -->
+
+<!-- 開幕カーテン（専用レイヤー） -->
+<div id="intro">
+  <div id="curtainL" class="curtain"></div>
+  <div id="curtainR" class="curtain"></div>
+  <div id="veil"></div>
+</div>
+
+<!-- 縦書きの端書き -->
+<div id="tateL" class="tate">曰く――決して、近づいてはならない場所。</div>
+<div id="tateR" class="tate">逃げられると思うな。<span class="red">呪いは、まだ終わらない。</span></div>
+
+<!-- 残り時間（呪いが解けた後に現れる） -->
+<div id="timerBox">
+  <div id="timerLabel" class="mono">残り時間</div>
+  <div id="timer">--:--:--</div>
+</div>
+
+<!-- メイン -->
+<main id="stage">
+  <div class="festHead">
+    <p class="eyebrow mono">文化祭ホラーアトラクション</p>
+    <p class="festName">令和８年度　近梅祭</p>
+  </div>
+
+  <!-- 深夜の掛け軸：主タイトル（こっくりさん／落款・からの脱出／朱印・呪） -->
+  <div class="kakejiku" id="kakejiku">
+    <div class="axisTop"><i></i><i></i></div>
+    <div class="paper">
+      <div class="stain"></div>
+      <div class="paperBody">
+        <div class="mainCol">
+          <h1 id="mainTitle" aria-label="こっくりさんからの脱出"></h1>
+        </div>
+        <div class="sideCol">
+          <div class="tateLine" id="sideTate"></div>
+          <span class="sealPaper" aria-hidden="true">呪</span>
+        </div>
+      </div>
+      <p class="inkNote">〜次はお前だ〜</p>
     </div>
+    <div class="axisBottom"><i></i><i></i></div>
+  </div>
 
-    <script>
-        // 入场初始化
-        setTimeout(() => {
-            document.getElementById('bg-anim').style.opacity = '1'; // 背景淡入
-        }, 100);
+  <div class="story" id="story">
+    <p class="line intro" style="--d:4.5s"><span class="no">序ノ一</span>この学校には、昔から決して近づいてはならない場所が存在する。</p>
+    <p class="line intro" style="--d:5.15s"><span class="no">序ノ二</span>文化祭の準備中、旧校舎の奥で発見された古びた扉。</p>
+    <p class="mid later" style="--d:.3s">✳</p>
+    <p class="line later" style="--d:.65s"><span class="no">序ノ三</span>好奇心に駆られた生徒たちが鍵を壊したその瞬間、<span class="hl">封印されていた呪い</span>が解き放たれた。</p>
+    <p class="line later" style="--d:1.25s"><span class="no">序ノ四</span>閉じ込められたあなたに残された時間はわずか。</p>
+    <p class="line later" style="--d:1.85s"><span class="no">序ノ五</span>館内に散りばめられた謎を解き明かし、この恐怖から生きて脱出せよ。</p>
+  </div>
 
-        // 鼠标跟随实现
-        document.addEventListener('mousemove', (e) => {
-            const follower = document.getElementById('cursor-shadow');
-            follower.style.left = e.clientX + 'px';
-            follower.style.top = e.clientY + 'px';
-        });
-    </script>
+  <div class="doorArea">
+    <p class="venue mono">場所：旧校舎・最奥の扉<span class="sep">｜</span>制作：一年三組</p>
+    <button id="door" type="button">扉を開ける</button>
+    <div id="whisper" class="whisper"></div>
+  </div>
+</main>
+
+<div class="credit" id="credit">
+  <span class="mono">© 2026 <b>KINDAI UNIVERSITY TOYOOKA SENIOR / JUNIOR HIGH SCHOOL</b></span>
+  <span class="mono">背景：自作ベクター（権利フリー）／ 令和８年度 近梅祭 出し物</span>
+</div>
+
+<!-- 環境アニメ（光塵・符札） -->
+<div id="envLayer"></div>
+
+<!-- マウスフォロー層 -->
+<div id="fxLayer">
+  <div id="fxHalo" class="foxfire"></div>
+  <div id="fxCore" class="foxfire"></div>
+  <div id="fxRipple"></div>
+</div>
+
+<!-- 悪寒フラッシュ -->
+<div id="chill"></div>
+
+<!-- 呪い演出 -->
+<div id="sealFlash"></div>
+<div id="seal">呪</div>
+
+<script>
+(() => {
+  "use strict";
+  /* ============================================================
+     開幕シーケンス
+  ============================================================ */
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ============================================================
+     主タイトルを「一幅の掛け軸」に構成
+     ・紙面に こっくりさん（墨書・大）
+     ・右端に縦書き落款 からの脱出（からの＝小・脱出＝朱）
+     ・「呪」の朱印（CSS側の sealPaper）
+  ============================================================ */
+  const h1 = document.getElementById("mainTitle");
+  const tateLine = document.getElementById("sideTate");
+
+  function addCh(parent, cls, c, tBase) {
+    const s = document.createElement("span");
+    s.className = "ch " + cls;
+    s.dataset.c = c;
+    s.textContent = c;
+    const d = reduced ? 0.03 : tBase;
+    s.style.setProperty("--d", d.toFixed(2) + "s");
+    parent.appendChild(s);
+  }
+  /* 紙面の主文：こっくりさん（墨書） */
+  "こっくりさん".split("").forEach((c, i) =>
+    addCh(h1, "cMain", c, 1.6 + i * 0.1));
+  /* 右端の落款：からの（灰）／脱出（朱）を縦に並べる */
+  const tateChars = [
+    { c: "か", cls: "cPa", d: 2.85 },
+    { c: "ら", cls: "cPa", d: 2.97 },
+    { c: "の", cls: "cPa", d: 3.09 },
+    { c: "脱", cls: "cEsc", d: 3.3 },
+    { c: "出", cls: "cEsc", d: 3.5 }
+  ];
+  tateChars.forEach(t => addCh(tateLine, t.cls, t.c, t.d));
+
+  /* 幕開け */
+  function openCurtain() {
+    document.getElementById("veil").classList.add("gone");
+    document.querySelectorAll(".curtain").forEach(c => c.classList.add("rise"));
+    const fh = document.querySelector(".festHead");
+    if (fh) fh.classList.add("in");
+  }
+  if (reduced) openCurtain();
+  else setTimeout(openCurtain, 350);
+
+  setTimeout(() => document.getElementById("credit").classList.add("in"), reduced ? 50 : 6600);
+
+  /* タイトルが揃ってから、文字をゆらゆらと動かす */
+  if (!reduced) setTimeout(startTitleSway, 5100);
+
+  /* ============================================================
+     マウスフォロー（狐火）
+  ============================================================ */
+  const layer = document.getElementById("fxLayer");
+  const core  = document.getElementById("fxCore");
+  const halo  = document.getElementById("fxHalo");
+  const ripp  = document.getElementById("fxRipple");
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const trailDots = [];
+  const N_DOTS = 9;
+
+  /* 掛け軸をマウスに合わせてそっと傾ける（入場後から） */
+  const kakejikuEl = document.getElementById("kakejiku");
+  let tiltReady = false;
+  if (!reduced && !coarse && kakejikuEl) {
+    setTimeout(() => {
+      kakejikuEl.style.animation = "none";
+      kakejikuEl.style.opacity = "1";
+      tiltReady = true;
+    }, 3600);
+  }
+  for (let i = 0; i < N_DOTS; i++) {
+    const d = document.createElement("div");
+    d.className = "trailDot";
+    const s = 12 - i * 1.05, o = 0.62 - i * 0.06;
+    d.style.setProperty("--s", s.toFixed(1) + "px");
+    d.style.setProperty("--o", Math.max(o, 0.08).toFixed(2));
+    layer.appendChild(d);
+    trailDots.push(d);
+  }
+
+  const hist = [];               // マウス軌跡の履歴
+  const MAX_HIST = N_DOTS * 6;
+  let mx = window.innerWidth * 0.62, my = window.innerHeight * 0.4;
+
+  function follow(x, y) {
+    mx = x; my = y;
+    hist.unshift([x, y]);
+    if (hist.length > MAX_HIST) hist.pop();
+    /* 軌跡に沿って狐火の尾を配置 */
+    trailDots.forEach((d, i) => {
+      const p = hist[i * 6] || hist[hist.length - 1];
+      d.style.left = p[0] + "px";
+      d.style.top  = p[1] + "px";
+    });
+  }
+
+  /* ゆっくり追いかける蒼い光 */
+  let cx = mx, cy = my, hx = mx, hy = my, raf = null;
+  function tick() {
+    cx += (mx - cx) * 0.16;
+    cy += (my - cy) * 0.16;
+    hx += (mx - hx) * 0.055;
+    hy += (my - hy) * 0.055;
+    core.style.left = cx + "px";
+    core.style.top  = cy + "px";
+    halo.style.left = hx + "px";
+    halo.style.top  = hy + "px";
+    /* 背景・タイトルの視差 */
+    const nx = (mx / window.innerWidth  - 0.5) * 2;
+    const ny = (my / window.innerHeight - 0.5) * 2;
+    document.getElementById("bgScene").style.transform =
+      "translate3d(" + (nx * -10).toFixed(2) + "px," + (ny * -7).toFixed(2) + "px,0)";
+    /* 掛け軸もマウスに合わせて微かに傾く（呪縛後はやや敏感に） */
+    if (tiltReady && kakejikuEl) {
+      const amp = document.body.classList.contains("cursed") ? 1.5 : 1;
+      kakejikuEl.style.transform =
+        "perspective(1100px) rotateX(" + (-ny * 1.6 * amp).toFixed(2) +
+        "deg) rotateY(" + (nx * 2.5 * amp).toFixed(2) + "deg)";
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  if (reduced || coarse) {
+    /* 静止位置に狐火を置くだけ */
+    follow(mx, my);
+    core.style.left = mx + "px"; core.style.top = my + "px";
+    halo.style.left = mx + "px"; halo.style.top = my + "px";
+    trailDots.forEach(d => { d.style.left = mx + "px"; d.style.top = my + "px"; });
+  } else {
+    window.addEventListener("mousemove", e => follow(e.clientX, e.clientY), { passive: true });
+    raf = requestAnimationFrame(tick);
+  }
+
+  /* クリックで波紋（タッチでも反応） */
+  function rippleAt(x, y) {
+    ripp.style.left = x + "px";
+    ripp.style.top  = y + "px";
+    ripp.classList.remove("pop");
+    void ripp.offsetWidth;               /* 再アニメーション用 */
+    ripp.classList.add("pop");
+  }
+  window.addEventListener("click", e => rippleAt(e.clientX, e.clientY), { passive: true });
+  window.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    if (t) rippleAt(t.clientX, t.clientY);
+  }, { passive: true });
+
+  /* ============================================================
+     扉の封印（2段階のインタラクション）
+  ============================================================ */
+  const door    = document.getElementById("door");
+  const whisper = document.getElementById("whisper");
+  const timerEl = document.getElementById("timer");
+  const timerBox = document.getElementById("timerBox");
+  const total = 59 * 60 + 59;            /* 59:59 から始まる */
+  let remain = total, opened = false, warnPhase = false, counting = false, tickId = null;
+
+  function fmt(n) {
+    const s = String(n % 60).padStart(2, "0");
+    const m = String(Math.floor(n / 60)).padStart(2, "0");
+    return "00:" + m + ":" + s;
+  }
+
+  const tateL = document.getElementById("tateL");
+  const tateR = document.getElementById("tateR");
+  const story = document.getElementById("story");
+
+  door.addEventListener("click", () => {
+    if (opened) return;
+
+    /* 1度目のクリック：触れただけでも空気が変わる */
+    if (!warnPhase) {
+      warnPhase = true;
+      document.body.classList.add("warn");   /* 画面が暖色に傾く */
+      door.classList.add("danger");
+      door.textContent = "…それでも開けるか？";
+      whisper.textContent = "「その扉は、開けてはならない。」";
+      whisper.classList.add("in");
+      /* 怪談の端書きが囁き始める＋悪寒が走り始める */
+      tateL.classList.add("in");
+      tateR.classList.add("in");
+      if (!reduced) startChill();
+      if (!reduced) setTimeout(() => door.classList.remove("danger"), 900);
+      return;
+    }
+
+    /* 2度目のクリック：扉が開き、呪いが解かれる */
+    opened = true;
+    warnPhase = false;
+    door.classList.add("opened");
+    door.classList.remove("danger");
+    door.textContent = "封印、解錠済";
+    document.body.classList.add("cursed");   /* 背景が血の色に染まる */
+    document.body.classList.remove("warn");
+    whisper.textContent = "扉は開かれた…呪いが、始まる。";
+    timerBox.classList.add("in");
+    timerEl.textContent = fmt(total);
+    remain = total;
+    counting = true;
+    tickId = setInterval(() => {
+      remain--;
+      timerEl.textContent = fmt(Math.max(remain, 0));
+      if (remain <= 0) {
+        clearInterval(tickId);
+        counting = false;
+        timerEl.textContent = "--:--:--";
+        whisper.textContent = "時間切れ――もう、逃げられない。";
+      }
+    }, 1000);
+    /* 開いて初めて語られる物語 ＋ 解けた封印の紙吹雪 */
+    story.classList.add("play");
+    if (!reduced) startAmbient();
+  });
+
+  /* ============================================================
+     タイトルの文字をゆっくり揺らめかせる（可読性を保つ穏やかな動き）
+  ============================================================ */
+  function startTitleSway() {
+    const els = [];
+    /* 揺らめくのは紙面の主文（こっくりさん）だけ。落款は静かに添える */
+    h1.querySelectorAll(".cMain").forEach(el => {
+      /* 登場アニメーションを外し、静的な表示に切り替えてから動かす */
+      el.style.animation = "none";
+      el.style.opacity = "1";
+      el.style.filter = "none";
+      els.push({
+        el,
+        ph: Math.random() * Math.PI * 2,     /* 字ごとに位相をずらす */
+        ph2: Math.random() * Math.PI * 2
+      });
+    });
+    if (!els.length) return;
+    let rafId = null;
+    const loop = (now) => {
+      const t = now / 1000;
+      for (const it of els) {
+        const y = Math.sin(t * 0.85 + it.ph) * 1.3;            /* ほんの僅か上下へ */
+        const r = Math.sin(t * 0.5 + it.ph2) * 0.5;            /* ほんの僅か回る */
+        it.el.style.transform =
+          "translateY(" + y.toFixed(2) + "px) rotate(" + r.toFixed(2) + "deg)";
+      }
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+  }
+
+  /* ============================================================
+     環境アニメ：光塵と符札の生成、悪寒フラッシュ
+  ============================================================ */
+  function startAmbient() {
+    const env = document.getElementById("envLayer");
+    if (!env) return;
+
+    /* うっすらと立ちのぼる光塵 */
+    for (let i = 0; i < 22; i++) {
+      const d = document.createElement("span");
+      d.className = "dust";
+      const size = 2 + Math.random() * 3;
+      d.style.width = d.style.height = size.toFixed(1) + "px";
+      d.style.left = (Math.random() * 100).toFixed(2) + "%";
+      d.style.setProperty("--dx", (Math.random() * 90 - 45).toFixed(0) + "px");
+      d.style.animationDuration = (9 + Math.random() * 14).toFixed(1) + "s";
+      d.style.animationDelay = (-Math.random() * 20).toFixed(1) + "s";
+      env.appendChild(d);
+    }
+
+    /* はらはらと舞い落ちる封印のお札 */
+    for (let i = 0; i < 7; i++) {
+      const o = document.createElement("span");
+      o.className = "ofuda";
+      o.style.left = (Math.random() * 96).toFixed(1) + "%";
+      o.style.setProperty("--rot", (90 + Math.random() * 200).toFixed(0) + "deg");
+      o.style.animationDuration = (11 + Math.random() * 9).toFixed(1) + "s";
+      o.style.animationDelay = (-Math.random() * 18).toFixed(1) + "s";
+      env.appendChild(o);
+    }
+  }
+
+  /* 一定間隔で悪寒（走査線フラッシュ）を走らせる */
+  function startChill() {
+    const chill = document.getElementById("chill");
+    if (!chill) return;
+    const go = () => {
+      chill.classList.remove("go");
+      void chill.offsetWidth;
+      chill.classList.add("go");
+    };
+    const loop = () => setTimeout(() => { go(); loop(); }, 8500 + Math.random() * 7000);
+    setTimeout(loop, 9000);
+  }
+
+  /* 環境アニメは最初は出さない。
+     1度目のクリックで「悪寒」、2度目で「符札と光塵」が解き放たれる */
+})();
+</script>
 </body>
 </html>
