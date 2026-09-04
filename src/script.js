@@ -188,8 +188,11 @@
     /* 背景・タイトルの視差 */
     const nx = (mx / window.innerWidth  - 0.5) * 2;
     const ny = (my / window.innerHeight - 0.5) * 2;
-    document.getElementById("bgScene").style.transform =
-      "translate3d(" + (nx * -10).toFixed(2) + "px," + (ny * -7).toFixed(2) + "px,0)";
+    /* 狭い画面ではCSS側の背景調整に任せる（視差は広い画面のみ） */
+    if (window.innerWidth > 560) {
+      document.getElementById("bgScene").style.transform =
+        "translate3d(" + (nx * -10).toFixed(2) + "px," + (ny * -7).toFixed(2) + "px,0)";
+    }
     /* 掛け軸もマウスに合わせて微かに傾く（呪縛後はやや敏感に） */
     if (tiltReady && kakejikuEl) {
       const amp = document.body.classList.contains("cursed") ? 1.5 : 1;

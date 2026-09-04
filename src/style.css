@@ -752,7 +752,7 @@ body.cursed .credit, .credit.in{opacity:.85}
   #door{font-size:clamp(1.05rem,4.6vw,1.28rem); padding:1.12em 1.5em 1.12em 1.92em;
     min-width:min(78vw,320px); min-height:64px; letter-spacing:.34em; text-indent:.34em}
   /* 風鈴は掛け軸の右脇・軸の外側に小さく吊るす（落款と重ならない） */
-  .windchime{right:-40px; bottom:6px; width:30px}
+  .windchime{right:-8px; bottom:auto; top:62%; width:26px}   /* 紙の右脇に沿って吊るす */
 
 }
 /* 細身スマホ：序文サイズを少し落として物語を収める */
@@ -769,6 +769,11 @@ body.cursed .credit, .credit.in{opacity:.85}
   .bellSub{letter-spacing:.3em; text-indent:.3em; font-size:.5rem}
   #timerBox{bottom:150px}
 }
+/* スマホの縦長画面：背景は月と校舎に寄せて表示（slice で切れて見えないのを防ぐ） */
+@media (max-width:560px){
+  #bgScene{transform:translateX(-318px) !important; transition:transform .8s ease}
+}
+
 /* アニメーション抑止ユーザー向け */
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important; animation-delay:0s !important; transition-duration:.01ms !important}

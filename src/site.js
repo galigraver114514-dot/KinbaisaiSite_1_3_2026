@@ -91,6 +91,6 @@
     if (!file || file === cur) { closeMenu(); return; }
     closeMenu();
     document.body.classList.add("leaving");
-    setTimeout(() => { location.href = file; }, 600);
+    setTimeout(() => { location.href = file; }, 840);
   }
 })();

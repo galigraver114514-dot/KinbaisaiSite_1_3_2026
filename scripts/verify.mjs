@@ -97,6 +97,12 @@ try {
     await sleep(100);
   }
   await sleep(8800); // wait for entrance timeline (door at 6.5s)
+  // wait until door unlocked (heavy load may delay entrance)
+  for (let i = 0; i < 60; i++) {
+    const locked = await ev('document.getElementById("door").classList.contains("locked")');
+    if (locked === false) break;
+    await sleep(100);
+  }
 
   // --- desktop 1440x810 ---
   const overflow0 = await ev('document.documentElement.scrollWidth - innerWidth');

@@ -75,17 +75,17 @@ body.bell-open #siteBell{opacity:0; pointer-events:none; transition:opacity .25s
 
 /* ---------- ページ遷移の幕（左右から合わさる血幕） ---------- */
 #trans{position:fixed; inset:0; z-index:300; pointer-events:none; display:flex}
-#trans i{flex:1; background:linear-gradient(180deg,#07040a 0%,#2a0712 55%,#4d0a1c 100%);
+#trans i{flex:1; will-change:transform;
+  background:linear-gradient(180deg,#0b0308 0%,#2c0712 46%,#4d0a1c 100%);
   transform:scaleY(0); transform-origin:top;
-  transition:transform .55s cubic-bezier(.7,0,.3,1)}
+  transition:transform .6s cubic-bezier(.7,0,.3,1)}
 #trans i:nth-child(2){transform-origin:bottom; transition-delay:.06s}
-#trans i:nth-child(3){background:
-  linear-gradient(180deg,#0d0310 0%,#4d0a1c 60%,#1c0308 100%);
-  transform-origin:top; transition-delay:.12s}
+#trans i:nth-child(3){transform-origin:top; transition-delay:.12s}
 body.leaving #trans i{transform:scaleY(1)}
 #trans b{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-  font-family:"Yuji Syuku",serif; letter-spacing:.5em; text-indent:.5em; color:#e8cfc0;
-  font-size:1rem; opacity:0; transition:opacity .3s ease .3s}
+  font-family:"Yuji Syuku",serif; white-space:nowrap;
+  letter-spacing:.38em; text-indent:.38em; color:#e8cfc0;
+  font-size:clamp(.62rem,2.4vw,.92rem); opacity:0; transition:opacity .3s ease .3s}
 body.leaving #trans b{opacity:.85}
 
 /* P0 上でこのCSSが被らないように（index 側に同じ名前の #intro 等は無関係） */
