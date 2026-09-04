@@ -12,9 +12,12 @@ const outDir  = path.join(root, 'dist');
 let html = readFileSync(srcHtml, 'utf8');
 
 const cssLink = '<link rel="stylesheet" href="src/style.css">';
+const siteCssLink = '<link rel="stylesheet" href="src/site.css">';
+const siteJsRef   = '<script src="src/site.js"></script>';
 const jsRef   = '<script src="src/script.js"></script>';
 
-if (html.indexOf(cssLink) === -1 || html.indexOf(jsRef) === -1) {
+if (html.indexOf(cssLink) === -1 || html.indexOf(jsRef) === -1 ||
+    html.indexOf(siteCssLink) === -1 || html.indexOf(siteJsRef) === -1) {
   console.error('[build] index.html は src 参照版ではありません（既にインライン?）');
   process.exit(1);
 }
@@ -22,6 +25,8 @@ const css = readFileSync(path.join(root, 'src', 'style.css'), 'utf8');
 const js  = readFileSync(path.join(root, 'src', 'script.js'), 'utf8');
 html = html.replace(cssLink, '<style>\n' + css + '\n</style>');
 html = html.replace(jsRef, '<script>\n' + js + '\n</script>');
+html = html.replace(siteCssLink, '<style>\n' + readFileSync(path.join(root, 'src', 'site.css'), 'utf8') + '\n</style>');
+html = html.replace(siteJsRef, '<script>\n' + readFileSync(path.join(root, 'src', 'site.js'), 'utf8') + '\n</script>');
 
 mkdirSync(outDir, { recursive: true });
 const out = path.join(outDir, 'index.html');

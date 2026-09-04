@@ -408,13 +408,14 @@
      ・ステージ3＝暴風（絶え間なくチリンチリン）
      ・触れると揺れて鳴る／マウスが近づくとそちらへ傾く
   ============================================================ */
-  /* 左上ベル：将来メニューになる。今は押すと一鳴きするだけ */
+  /* 左上ベル＝メニュー開閉（鳴らして開く） */
   if (bellFig) {
     bellFig.addEventListener("click", () => {
       ensureAudio();
-      bellTone(0, 220, 0.7, 0.16);
-      bellTone(0.18, 175, 0.9, 0.12);
+      bellTone(0, 220, 0.5, 0.1);
+      bellTone(0.18, 175, 0.7, 0.08);
       bellQuiver();
+      if (window.SiteMenu) SiteMenu.toggle();
     });
     bellFig.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {

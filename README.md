@@ -117,10 +117,17 @@ node scripts/verify.mjs
 
 ```
 KinbaisaiSite_1_3_2026/
-├── index.html            ← 本体（開発版：src/ を参照）
+├── index.html            ← P0 入口（開発版：src/ を参照）
+├── story.html             ← P1 物語（準備中）
+├── game.html              ← P2 本編・計時（準備中）
+├── venue.html             ← P3 会場案内（準備中）
+├── staff.html             ← P4 スタッフ（準備中）
+├── end.html               ← P5 結末（準備中）
 ├── src/
-│   ├── style.css         ← スタイル（デザイン変更はここ）
-│   └── script.js         ← 挙動（インタラクション・音・演出）
+│   ├── style.css         ← P0 のスタイル
+│   ├── script.js         ← P0 の挙動
+│   ├── site.css          ← 全站共通（ベルメニュー・遷移の幕・簡易ページ枠）
+│   └── site.js           ← 全站共通（メニュー開閉・ページ遷移・シェル注入）
 ├── scripts/
 │   ├── ensure-chrome.mjs ← 検証用 headless Chrome を .cache/ に一度だけ取得（冪等）
 │   ├── verify.mjs        ← 自動レイアウト検証（PASS/FAIL を出力）
@@ -134,6 +141,8 @@ KinbaisaiSite_1_3_2026/
 ```
 
 > **単一HTMLが必要なとき**（オフライン配布 / Google Sites の「埋め込みコード」へ全文を貼る等）は `node scripts/build.mjs` を実行し、`dist/index.html` を1枚だけ使ってください。GitHub Pages での公開は **src/ 付きのまま**でOKです。
+>
+> **ページ間ナビゲーション**：どのページも左上の**ベル（鐘）**を押すと全ページの目次（入口／物語／本編／会場案内／スタッフ／結末）が開きます。移動時は左右から血幕が閉じて遷移します（ベルは P0 では従来の吊るし鐘、P1〜P5 では全站共通の小さめの鐘）。
 
 ## タイトル案の選び方（titles-preview.html）
 

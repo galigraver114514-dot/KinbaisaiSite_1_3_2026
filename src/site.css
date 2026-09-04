@@ -1,0 +1,91 @@
+/* ============================================================
+   site.css — 全站共通（ナビメニュー・ページ遷移・簡易ページ枠）
+   ・P0(index.html) は src/style.css と併用（重複しないよう #site* 空間）
+   ・P1〜P5 は body.site-page としてこのファイルだけで背景を持つ
+============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{overflow-x:hidden; background:#07080f}
+
+/* ---------- 簡易ページ（P1〜P5）の夜背景 ---------- */
+body.site-page{
+  font-family:"Shippori Mincho","Kaisei Tokumin","Yu Gothic",serif;
+  color:#e8e2d2;
+  background:
+    radial-gradient(120% 80% at 20% -10%, rgba(96,128,158,.16), transparent 55%),
+    radial-gradient(90% 70% at 85% 115%, rgba(150,20,40,.14), transparent 60%),
+    linear-gradient(180deg,#0a0e1d 0%,#141229 45%,#1b1130 100%);
+  min-height:100%}
+body.site-page::before{content:""; position:fixed; inset:-30px; pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='ns'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23ns)' opacity='0.5'/></svg>");
+  opacity:.04; animation:siteFlick 2.4s steps(4) infinite}
+@keyframes siteFlick{0%,100%{opacity:.03}50%{opacity:.06}}
+.site-page .wrap{position:relative; max-width:860px; margin:0 auto; padding:9vh 4vw 12vh; z-index:1;
+  animation:siteIn .8s ease-out}
+@keyframes siteIn{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
+.site-page h1{font-family:"Kaisei Tokumin",serif; font-weight:900;
+  font-size:clamp(1.6rem,4.4vw,3rem); letter-spacing:.34em; text-indent:.34em;
+  color:#eadfc4; text-shadow:0 0 30px rgba(255,170,80,.12); line-height:1.5}
+.site-page h1 .en{display:block; font-family:"IM Fell English SC","Metal Mania",serif;
+  font-size:.34em; letter-spacing:.6em; text-indent:.6em; color:#9aa7b2; font-weight:400;
+  text-shadow:none; margin-top:.6em}
+.site-page .rule{width:90px; height:2px; margin:3vh auto; opacity:.5;
+  background:linear-gradient(90deg,transparent,#b0303e,transparent)}
+.site-page .prep{color:#b7c0cc; line-height:2.1; letter-spacing:.06em; font-size:.95rem}
+.site-page .prep b{color:#e07070; font-weight:500}
+.site-page .prep .ph{margin-top:3vh; border:1px dashed rgba(180,60,70,.5); padding:2.4vh 1.4em;
+  color:#9aa6b0; font-size:.85rem}
+
+/* ---------- 左上のベル＝メニューボタン（全ページ） ---------- */
+#siteBell{position:fixed; top:14px; left:38px; z-index:240; width:min(9vw,104px);
+  cursor:pointer; background:none; border:0; padding:0; color:inherit;
+  filter:drop-shadow(0 8px 14px rgba(0,0,0,.6));
+  transition:filter .35s ease, transform .2s ease}
+#siteBell svg{width:100%; height:auto; display:block}
+#siteBell:hover,#siteBell:focus-visible{filter:drop-shadow(0 8px 20px rgba(150,180,255,.6)) brightness(1.25)}
+#siteBell:active{transform:scale(.96)}
+#siteBell .swing2{transform-box:view-box; transform-origin:110px 14px;
+  animation:siteBellDangle 9s ease-in-out infinite}
+@keyframes siteBellDangle{0%,100%{transform:rotate(-.7deg)}50%{transform:rotate(.7deg)}}
+body.bell-open #siteBell{opacity:0; pointer-events:none; transition:opacity .25s}
+
+/* ---------- メニュー（血幕＋掛け軸のリスト） ---------- */
+#siteMenu{position:fixed; inset:0; z-index:250; display:none}
+#siteMenu.open{display:block}
+#siteMenu .mask{position:absolute; inset:0;
+  background:radial-gradient(120% 90% at 50% 40%, rgba(60,6,16,.88), rgba(8,2,6,.96));
+  cursor:pointer; animation:maskIn .35s ease}
+@keyframes maskIn{from{opacity:0}to{opacity:1}}
+#siteMenu nav{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(86vw,560px); text-align:center}
+#siteMenu .m-title{font-family:"Yuji Syuku",serif; font-size:.9rem; letter-spacing:.6em;
+  text-indent:.6em; color:#c98; margin-bottom:2.4vh}
+#siteMenu a{display:block; text-decoration:none; color:#eee6d2;
+  font-family:"Kaisei Tokumin",serif; font-weight:700;
+  font-size:clamp(1.05rem,3.4vw,1.5rem); letter-spacing:.34em; text-indent:.34em;
+  padding:1.5vh .4em; border-bottom:1px solid rgba(200,120,120,.14);
+  transition:color .25s, letter-spacing .25s, background .25s}
+#siteMenu a small{display:block; font-family:"Shippori Mincho",serif; font-weight:400;
+  font-size:.58em; letter-spacing:.3em; text-indent:.3em; color:#97888e; margin-top:.2em}
+#siteMenu a:hover,#siteMenu a.here{color:#ffb3a0; letter-spacing:.5em; text-indent:.5em}
+#siteMenu a.here::before{content:"※"; color:#d43a4a; font-size:.7em; margin-right:.4em}
+#siteMenu a.here small{color:#c98}
+#siteMenu .m-close{position:absolute; top:4vh; right:4vw; color:#8a93a4; font-size:.8rem;
+  letter-spacing:.3em; cursor:pointer; font-family:"DotGothic16",monospace}
+
+/* ---------- ページ遷移の幕（左右から合わさる血幕） ---------- */
+#trans{position:fixed; inset:0; z-index:300; pointer-events:none; display:flex}
+#trans i{flex:1; background:linear-gradient(180deg,#07040a 0%,#2a0712 55%,#4d0a1c 100%);
+  transform:scaleY(0); transform-origin:top;
+  transition:transform .55s cubic-bezier(.7,0,.3,1)}
+#trans i:nth-child(2){transform-origin:bottom; transition-delay:.06s}
+#trans i:nth-child(3){background:
+  linear-gradient(180deg,#0d0310 0%,#4d0a1c 60%,#1c0308 100%);
+  transform-origin:top; transition-delay:.12s}
+body.leaving #trans i{transform:scaleY(1)}
+#trans b{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  font-family:"Yuji Syuku",serif; letter-spacing:.5em; text-indent:.5em; color:#e8cfc0;
+  font-size:1rem; opacity:0; transition:opacity .3s ease .3s}
+body.leaving #trans b{opacity:.85}
+
+/* P0 上でこのCSSが被らないように（index 側に同じ名前の #intro 等は無関係） */
