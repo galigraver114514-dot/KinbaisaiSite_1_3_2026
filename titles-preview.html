@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE LAST BELL ― タイトル版式 6案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Rye&family=Jim+Nightshade&family=Nosifer&family=Butcherman&family=Creepster&family=IM+Fell+English+SC&family=Special+Elite&family=Yuji+Syuku&family=Kaisei+Tokumin:wght@500;700&family=Shippori+Mincho:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:
+      radial-gradient(120% 80% at 20% -10%, rgba(90,120,150,.14), transparent 55%),
+      radial-gradient(90% 70% at 85% 110%, rgba(150,20,40,.16), transparent 60%),
+      #0a0c12; color:#ddd; padding:36px 3vw 70px;
+    font-family:"Yu Gothic","Hiragino Sans",sans-serif}
+  header{text-align:center; margin-bottom:6px}
+  h1{font-size:clamp(1.2rem,2.6vw,1.9rem); letter-spacing:.5em; font-weight:400; color:#d8d2c2}
+  p.lead{text-align:center; color:#7e8698; font-size:.8rem; margin:6px 0 30px; line-height:2}
+  .cards{display:grid; grid-template-columns:1fr; gap:26px; max-width:1200px; margin:0 auto}
+  .card{background:linear-gradient(180deg,#141926,#0e1119 80%); border:1px solid rgba(255,255,255,.08);
+    border-radius:14px; padding:22px 22px 18px; box-shadow:0 16px 34px rgba(0,0,0,.5)}
+  .card h2{font-size:1rem; color:#f0e8d4; letter-spacing:.3em; font-weight:400; margin-bottom:4px}
+  .card h2 b{color:#e06060}
+  .strip{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:10px 0 4px}
+  .panel{border-radius:8px; overflow:hidden; min-height:240px; display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:18px 14px; position:relative}
+  .p-washi{background:
+      radial-gradient(120% 90% at 12% 8%, rgba(255,246,220,.55), transparent 45%),
+      linear-gradient(160deg,#f1e8cf,#e2d4b2);
+    box-shadow:inset 0 0 26px rgba(110,84,46,.28)}
+  .p-night{background:
+      radial-gradient(130% 90% at 18% -10%, rgba(200,60,80,.12), transparent 55%),
+      radial-gradient(120% 80% at 90% 115%, rgba(160,10,30,.3), transparent 60%),
+      linear-gradient(160deg,#232a35,#10131b);
+    box-shadow:inset 0 0 40px rgba(0,0,0,.8)}
+  .demo{width:100%; position:relative; user-select:none}
+  .meta{display:flex; justify-content:space-between; gap:14px; align-items:baseline; margin-top:8px; flex-wrap:wrap}
+  .use{font-size:.74rem; color:#8fa0ae; letter-spacing:.04em; line-height:1.7}
+  .why{font-size:.8rem; color:#d9a89a; line-height:1.7; max-width:520px; text-align:right}
+  /* ============ 各案の排版（両パネル共通だが色だけ .p-washi/.p-night で変える） ============ */
+  .case1 .big{font-family:"Metal Mania",serif; font-size:clamp(34px,7vw,96px); letter-spacing:.06em; line-height:1}
+  .case1 .bell{font-family:"Rye",serif; color:#b01830; letter-spacing:.02em}
+  .case1 .sub{margin-top:.6em; font-family:"Kaisei Tokumin",serif; font-size:clamp(11px,1.5vw,15px); letter-spacing:.42em; opacity:.85}
+  .case1 .seal{display:inline-block; border:2px solid currentColor; padding:.1em .24em; font-family:"Yuji Syuku",serif; font-size:.55em; transform:rotate(-8deg); margin-left:.9em; vertical-align:.15em}
+  .p-washi .case1{color:#33210c} .p-washi .case1 .sub{color:#6a5638}
+  .p-night .case1{color:#efe6d2} .p-night .case1 .bell{color:#ff5544} .p-night .case1 .sub{color:#d9c0ae}
+
+  .case2{font-family:"Metal Mania",serif}
+  .case2 .line{display:block; letter-spacing:.5em; font-size:clamp(16px,3vw,34px); opacity:.92}
+  .case2 .line.small{padding-left:.5em}
+  .case2 .bigbell{font-family:"Rye",serif; display:block; font-size:clamp(64px,13vw,190px); letter-spacing:.08em; line-height:1; margin-top:.08em}
+  .case2 .side{font-family:"Kaisei Tokumin",serif; writing-mode:vertical-rl; position:absolute; right:10px; top:8px; font-size:clamp(10px,1.3vw,14px); letter-spacing:.3em; opacity:.85}
+  .case2 .seal{font-family:"Yuji Syuku",serif; border:2px solid currentColor; padding:.08em .2em; position:absolute; right:14px; bottom:10px; font-size:clamp(11px,1.4vw,16px); transform:rotate(-7deg)}
+  .p-washi .case2{color:#33210c} .p-washi .case2 .side{color:#7a5638}
+  .p-night .case2{color:#e9e0cd} .p-night .case2 .side{color:#d6b9a4}
+  .case2 .bigbell,.case2 .seal{color:#b01830} .p-night .case2 .bigbell{color:#ff5040}
+
+  .case3 .t{font-family:"Jim Nightshade",cursive; font-size:clamp(40px,8vw,120px); line-height:1; letter-spacing:.02em}
+  .case3 .b{font-family:"Nosifer",cursive; color:#b01830; font-size:1.15em}
+  .case3 .sub{margin-top:.7em; font-family:"Shippori Mincho",serif; font-size:clamp(10px,1.4vw,14px); letter-spacing:.4em; opacity:.8}
+  .p-washi .case3{color:#2e1c0c} .p-washi .case3 .b{color:#b01830} .p-washi .case3 .sub{color:#7a5638}
+  .p-night .case3{color:#efe7d4} .p-night .case3 .b{color:#ff4a3a} .p-night .case3 .sub{color:#d9c0ae}
+
+  .case4{font-family:"IM Fell English SC",serif; letter-spacing:.34em}
+  .case4 .t{font-size:clamp(30px,6.4vw,88px); line-height:1.1}
+  .case4 .bell{color:#8a6a3a}
+  .case4 .sub{margin-top:1.1em; font-family:"Shippori Mincho",serif; letter-spacing:.5em; font-size:clamp(9px,1.2vw,13px); opacity:.8}
+  .case4 .rule{width:min(360px,70%); height:1px; margin:.8em auto 0; opacity:.5; background:currentColor}
+  .p-washi .case4{color:#3a2a14} .p-washi .case4 .bell{color:#a03030}
+  .p-night .case4{color:#cfd6d2} .p-night .case4 .bell{color:#e8b0a0}
+
+  .case5{position:relative}
+  .case5 .jp{font-family:"Yuji Syuku",serif; writing-mode:vertical-rl; font-size:clamp(52px,11vw,170px);
+    letter-spacing:.12em; line-height:1.15; text-indent:0}
+  .case5 .en{font-family:"IM Fell English SC",serif; letter-spacing:.34em; font-size:clamp(11px,1.6vw,17px);
+    margin-top:.6em; opacity:.9}
+  .case5 .seal{font-family:"Yuji Syuku",serif; border:2.5px solid currentColor; padding:.05em .18em;
+    font-size:clamp(13px,1.8vw,20px); transform:rotate(-10deg); margin-left:.7em; display:inline-block; vertical-align:.2em}
+  .p-washi .case5{color:#2a1a08}
+  .p-night .case5{color:#f1e6cf}
+  .case5 .seal{color:#b01830} .p-night .case5 .seal{color:#ff4a3a}
+
+  .case6{font-family:"Special Elite",serif; letter-spacing:.18em}
+  .case6 .t{font-size:clamp(30px,6vw,86px); line-height:1.25}
+  .case6 .scr{font-family:"Jim Nightshade",cursive; font-size:.55em; display:block; margin-top:.5em;
+    letter-spacing:.08em; color:#b01830; transform:rotate(-2deg)}
+  .case6 .scr i{font-family:"Yuji Syuku",serif; font-style:normal; font-size:1.1em; text-decoration:underline wavy}
+  .p-washi .case6{color:#3a2c18}
+  .p-night .case6{color:#e7ded2} .p-night .case6 .scr{color:#ff6a52}
+  footer{text-align:center; margin-top:40px; color:#77809a; font-size:.85rem; line-height:2.2}
+  footer b{color:#f0b0a0}
+  @media (max-width:760px){ .strip{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header><h1>THE LAST BELL ― タイトル版式 6案</h1></header>
+<p class="lead">左＝和紙面（実際の掛け軸）／右＝夜・血面での見え方。<br>「案の番号」で指定してください（例：2番）。細部の調整（字間・色・大きさ）は選定後に合わせます。</p>
+<div class="cards">
+
+  <div class="card case1">
+    <h2>案1 <b>一行・金属＋血のBELL</b>（現在の方向を彫り直し）</h2>
+    <div class="strip">
+      <div class="panel p-washi"><div class="demo"><div class="big">THE LAST <span class="bell">BELL</span></div><div class="sub">ザ・ラストベル ― 最後の鐘<span class="seal">呪</span></div></div></div>
+      <div class="panel p-night"><div class="demo"><div class="big">THE LAST <span class="bell">BELL</span></div><div class="sub">ザ・ラストベル ― 最後の鐘<span class="seal">呪</span></div></div></div>
+    </div>
+    <div class="meta"><span class="use">Metal Mania ＋ Rye（BELLのみ・朱）／副注に朱印</span><span class="why">一行で完結。金属刻字と看板BELLの対比を強調した現行案</span></div>
+  </div>
+
+  <div class="card case2">
+    <h2>案2 <b>二段構え・BELL主役</b>（最も“題”らしい）</h2>
+    <div class="strip">
+      <div class="panel p-washi"><div class="demo"><div class="case2"><span class="line">THE LAST</span><span class="bigbell">BELL</span><span class="side">時は満ちた</span><span class="seal">呪</span></div></div></div>
+      <div class="panel p-night"><div class="demo"><div class="case2"><span class="line">THE LAST</span><span class="bigbell">BELL</span><span class="side">時は満ちた</span><span class="seal">呪</span></div></div></div>
+    </div>
+    <div class="meta"><span class="use">Metal Mania（小見出し）＋ Rye（BELL・特大朱）／右端に縦書き＋朱印</span><span class="why">THE LAST は小さく添え、BELL を最大に。和の落款を添えると“表題”らしくなる</span></div>
+  </div>
+
+  <div class="card case3">
+    <h2>案3 <b>手書き血書・亡霊の筆跡</b>（最もこわい）</h2>
+    <div class="strip">
+      <div class="panel p-washi"><div class="demo"><div class="case3"><span class="t">THE LAST <span class="b">BELL</span></span><div class="sub">ザ・ラストベル ― 最後の鐘</div></div></div></div>
+      <div class="panel p-night"><div class="demo"><div class="case3"><span class="t">THE LAST <span class="b">BELL</span></span><div class="sub">ザ・ラストベル ― 最後の鐘</div></div></div></div>
+    </div>
+    <div class="meta"><span class="use">Jim Nightshade（手書きの亡霊）＋ Nosifer（BELL・滴血）</span><span class="why">“人の字”の不気味さ＋血の字。手書きの恐怖が最強に効く案</span></div>
+  </div>
+
+  <div class="card case4">
+    <h2>案4 <b>碑文・刻まれた銘</b>（古雅で重い）</h2>
+    <div class="strip">
+      <div class="panel p-washi"><div class="demo"><div class="case4"><div class="t">THE LAST <span class="bell">BELL</span></div><div class="rule"></div><div class="sub">ザ・ラストベル ― 最後の鐘</div></div></div></div>
+      <div class="panel p-night"><div class="demo"><div class="case4"><div class="t">THE LAST <span class="bell">BELL</span></div><div class="rule"></div><div class="sub">ザ・ラストベル ― 最後の鐘</div></div></div></div>
+    </div>
+    <div class="meta"><span class="use">IM Fell English SC（小大文字）・広めの字間</span><span class="why">墓石や旧校舎の銘板を思わせる。抑えめだが風格のある恐怖</span></div>
+  </div>
+
+  <div class="card case5">
+    <h2>案5 <b>和風・書「最後の鐘」</b>（文化祭で最も映える和）</h2>
+    <div class="strip">
+      <div class="panel p-washi"><div class="demo"><div class="case5"><span class="jp">最後の鐘</span><div><span class="en">THE LAST BELL</span><span class="seal">呪</span></div></div></div></div>
+      <div class="panel p-night"><div class="demo"><div class="case5"><span class="jp">最後の鐘</span><div><span class="en">THE LAST BELL</span><span class="seal">呪</span></div></div></div></div>
+    </div>
+    <div class="meta"><span class="use">Yuji Syuku（書・大）＋ IM Fell English SC（英語小眉）＋朱印</span><span class="why">英語が苦手でも伝わる和の大題。掛け軸に一番しっくり来る</span></div>
+  </div>
+
+  <div class="card case6">
+    <h2>案6 <b>校内の貼り紙・書き殴り</b>（異色・ストーリー感）</h2>
+    <div class="strip">
+      <div class="panel p-washi"><div class="demo"><div class="case6"><span class="t">THE LAST BELL</span><span class="scr">※放課後は<i>来ない</i>。…時は満ちた。</span></div></div></div>
+      <div class="panel p-night"><div class="demo"><div class="case6"><span class="t">THE LAST BELL</span><span class="scr">※放課後は<i>来ない</i>。…時は満ちた。</span></div></div></div>
+    </div>
+    <div class="meta"><span class="use">Special Elite（タイプライター）＋ Jim Nightshade / Yuji Syuku（血の追記）</span><span class="why">掲示物に誰かが血文字を書き足した設定。物語を先に語れる案</span></div>
+  </div>
+
+</div>
+<footer>選んだら index.html のタイトル部分だけを組み替えます。<br>「案2の<u>文字の並び</u>＋案3の<u>手書き字体</u>」のような組み合わせ指定もOKです。<b>※すべて Google Fonts（OFL）＝商用・改変自由</b></footer>
+</body>
+</html>

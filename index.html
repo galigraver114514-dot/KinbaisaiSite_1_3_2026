@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="文化祭ホラーアトラクション『The Last Bell（ザ・ラストベル）』入口ページ。旧校舎の扉を開けば、最後の鐘が鳴る。生きて脱出せよ。">
+<title>The Last Bell ― 旧校舎・最後の鐘｜文化祭出し物</title>
+<!-- ============================================================
+  文化祭ホラー脱出ゲーム「The Last Bell」　入口ページ
+  ・シングルHTML（外部画像なし / 背景は自作ベクターSVG＝権利クリーン）
+  ・差し替えポイントは各所コメント「★」を参照
+============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Kaisei+Tokumin:wght@700;900&family=Shippori+Mincho:wght@500;600&family=Yuji+Syuku&family=Special+Elite&family=Metal+Mania&family=Rye&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+
+<!-- 背景一式（専用レイヤー・画面からはみ出さない） -->
+<div id="fxBack">
+<!-- ============================================================
+   背景：自作ベクター（旧校舎と千本鳥居の夜）
+   ★背景を差し替えたい場合★
+   1) この <svg> を削除し、代わりに <img src="あなたの画像.jpg"> を置く
+   2) または上記 :root の配色で写真に被せる夜フィルターを調整する
+============================================================ -->
+<svg id="bgScene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#04060e"/>
+      <stop offset=".45" stop-color="#0a0e21"/>
+      <stop offset=".72" stop-color="#1a1433"/>
+      <stop offset="1"   stop-color="#301528"/>
+    </linearGradient>
+    <radialGradient id="moonGrad" cx=".38" cy=".34" r=".9">
+      <stop offset="0"  stop-color="#fdf8e6"/>
+      <stop offset=".6" stop-color="#eaddb6"/>
+      <stop offset="1"  stop-color="#c9b993"/>
+    </radialGradient>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#f4e9c8" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#f4e9c8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lampGrad" cx=".5" cy=".22" r=".9">
+      <stop offset="0"  stop-color="#ffe9b0"/>
+      <stop offset=".55" stop-color="#ffb45e"/>
+      <stop offset="1"  stop-color="#d9712f"/>
+    </radialGradient>
+    <radialGradient id="foxEye" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ff8a7a" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#ff2b1e" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#ff2b1e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="2.4"/></filter>
+  </defs>
+
+  <!-- 空 -->
+  <rect width="1600" height="900" fill="url(#skyGrad)"/>
+
+  <!-- 星 -->
+  <g fill="#dfe6ff">
+    <circle cx="120"  cy="70"  r="1.1" opacity=".7"/>
+    <circle cx="240"  cy="150" r=".7"  opacity=".5"/>
+    <circle cx="330"  cy="55"  r="1.4" opacity=".8"></circle>
+    <circle cx="470"  cy="120" r=".6"  opacity=".45"/>
+    <circle cx="560"  cy="60"  r=".9"  opacity=".6"/>
+    <circle cx="660"  cy="170" r=".6"  opacity=".4"/>
+    <circle cx="740"  cy="70"  r="1.2" opacity=".7"></circle>
+    <circle cx="70"   cy="230" r=".6"  opacity=".4"/>
+    <circle cx="830"  cy="140" r=".7"  opacity=".5"/>
+    <circle cx="150"  cy="320" r=".8"  opacity=".4"/>
+    <circle cx="940"  cy="90"  r=".6"  opacity=".5"/>
+    <circle cx="1020" cy="200" r=".9"  opacity=".55"/>
+    <circle cx="360"  cy="240" r=".6"  opacity=".4"/>
+    <circle cx="520"  cy="280" r="1"   opacity=".55"></circle>
+    <circle cx="690"  cy="320" r=".7"  opacity=".4"/>
+    <circle cx="1100" cy="60"  r=".8"  opacity=".6"/>
+    <circle cx="1380" cy="90"  r="1.2" opacity=".7"/>
+    <circle cx="1520" cy="170" r=".7"  opacity=".5"/>
+    <circle cx="1460" cy="60"  r=".6"  opacity=".4"/>
+    <circle cx="1180" cy="140" r=".8"  opacity=".4"/>
+    <circle cx="880"  cy="40"  r=".7"  opacity=".5"/>
+    <circle cx="60"   cy="430" r=".6"  opacity=".35"/>
+    <circle cx="1580" cy="420" r=".6"  opacity=".35"/>
+    <circle cx="1330" cy="240" r=".7"  opacity=".45"/>
+    <circle cx="900"  cy="230" r=".6"  opacity=".4"/>
+    <circle cx="480"  cy="420" r=".6"  opacity=".3"/>
+    <circle cx="1230" cy="40"  r=".5"  opacity=".6"/>
+    <circle cx="750"  cy="380" r=".5"  opacity=".3"/>
+  </g>
+  <!-- 星のまたたき（CSS・静けさを破る） -->
+  <g class="twLayer">
+    <circle class="tw" style="--d:-.4s;--tw:3.8s;--o:.8"  cx="86"  cy="140" r="1"/>
+    <circle class="tw" style="--d:-2s;--tw:5.4s;--o:.55" cx="176" cy="52"  r=".9"/>
+    <circle class="tw" style="--d:-1s;--tw:4.4s;--o:.7"  cx="288" cy="196" r="1.1"/>
+    <circle class="tw" style="--d:-3s;--tw:6s;--o:.5"   cx="420" cy="60"  r=".8"/>
+    <circle class="tw" style="--d:-.8s;--tw:3.4s;--o:.75" cx="588" cy="120" r="1.2"/>
+    <circle class="tw" style="--d:-2.4s;--tw:5s;--o:.6" cx="682" cy="210" r=".9"/>
+    <circle class="tw" style="--d:-1.6s;--tw:4.8s;--o:.65"cx="812" cy="84"  r="1"/>
+    <circle class="tw" style="--d:-3.4s;--tw:6.4s;--o:.5" cx="988" cy="168" r=".8"/>
+    <circle class="tw" style="--d:-.2s;--tw:3.6s;--o:.8"  cx="1430" cy="150" r="1.1"/>
+    <circle class="tw" style="--d:-2.2s;--tw:5.6s;--o:.55" cx="1546" cy="60" r=".9"/>
+    <circle class="tw" style="--d:-1.2s;--tw:4.2s;--o:.7" cx="1360" cy="330" r="1"/>
+    <circle class="tw" style="--d:-2.8s;--tw:5.2s;--o:.6" cx="98"  cy="330" r=".9"/>
+  </g>
+
+  <!-- 月と暈（右上方・タイトルと重ならないよう高く寄せる） -->
+  <g transform="translate(90,-52)">
+    <circle cx="1210" cy="195" r="300" fill="url(#halo)">
+      <animate attributeName="opacity" values="1;.7;1" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1210" cy="195" r="148" fill="url(#moonGrad)"/>
+    <circle id="bloodMoon" cx="1210" cy="195" r="148" fill="#d41f3a" opacity="0"/>
+    <g fill="#cdbd95" opacity=".45">
+      <circle cx="1160" cy="170" r="17"/>
+      <circle cx="1245" cy="235" r="12"/>
+      <circle cx="1238" cy="140" r="7"/>
+      <circle cx="1145" cy="225" r="6"/>
+    </g>
+    <!-- 月を隠す暗雲（ごくゆっくり流れる） -->
+    <g class="cloudDrift" fill="#0a0d1e" opacity=".92">
+      <circle cx="1060" cy="252" r="150"/>
+      <circle cx="1215" cy="290" r="175"/>
+      <circle cx="1360" cy="238" r="135"/>
+      <circle cx="1180" cy="340" r="160"/>
+      <circle cx="1470" cy="330" r="115"/>
+    </g>
+  </g>
+
+  <!-- 山なみ -->
+  <path d="M0,600 L190,556 L420,612 L700,558 L980,616 L1240,562 L1600,612 L1600,690 L0,690 Z"
+        fill="#232041" opacity=".5"/>
+  <path d="M0,648 L260,600 L520,655 L840,602 L1140,660 L1440,606 L1600,648 L1600,790 L0,790 Z"
+        fill="#181535" opacity=".85"/>
+
+  <!-- 旧校舎（鐘楼つき） -->
+  <g id="school">
+    <!-- 屋根・塔 -->
+    <path d="M988,514 L1030,452 L1072,514 Z" fill="#0d0f24"/>
+    <rect x="996" y="514" width="68" height="150" fill="#101328"/>
+    <circle cx="1030" cy="492" r="13" fill="none" stroke="#6f769e" stroke-width="2"/>
+    <line x1="1030" y1="492" x2="1030" y2="483" stroke="#6f769e" stroke-width="1.6"/>
+    <line x1="1030" y1="492" x2="1036" y2="496" stroke="#6f769e" stroke-width="1.6"/>
+    <!-- 塔の窓 -->
+    <rect x="1024" y="542" width="12" height="52" fill="#05070f"/>
+    <circle cx="1030" cy="556" r="2" fill="#ffcf8a" opacity=".8"/>
+    <circle cx="1030" cy="576" r="2" fill="#ffcf8a" opacity=".45"/>
+    <!-- 主屋 -->
+    <path d="M1006,540 L1128,478 L1252,540 Z" fill="#0b0d21"/>
+    <rect x="1036" y="538" width="196" height="126" fill="#12162f"/>
+    <!-- 主屋の窓（明かりが点く窓と点かない窓） -->
+    <g>
+      <rect x="1058" y="562" width="15" height="24" fill="#05070f"/>
+      <rect class="win" x="1102" y="562" width="15" height="24" fill="#ffcf8a" opacity=".55"/>
+      <rect x="1146" y="562" width="15" height="24" fill="#05070f"/>
+      <rect class="win" x="1190" y="562" width="15" height="24" fill="#ffcf8a" opacity=".3"/>
+      <rect class="win" x="1058" y="606" width="15" height="24" fill="#ffcf8a" opacity=".4"/>
+      <rect x="1102" y="606" width="15" height="24" fill="#05070f"/>
+      <rect class="win" x="1146" y="606" width="15" height="24" fill="#ffcf8a" opacity=".6"/>
+      <rect x="1190" y="606" width="15" height="24" fill="#05070f"/>
+    </g>
+    <!-- 入口の扉（開いた暗い穴・呪いが解けると内側が紅い光を放つ） -->
+    <rect id="doorHole" x="1090" y="618" width="88" height="46" fill="#04050c"/>
+    <rect x="1090" y="618" width="88" height="46" fill="none" stroke="#2a3050" stroke-width="2"/>
+    <!-- 平屋 -->
+    <path d="M1246,578 L1300,544 L1360,578 Z" fill="#0a0c1f"/>
+    <rect x="1252" y="578" width="112" height="86" fill="#0f1229"/>
+    <rect class="win" x="1272" y="608" width="16" height="24" fill="#ffcf8a" opacity=".5"/>
+    <rect x="1322" y="608" width="16" height="24" fill="#05070f"/>
+  </g>
+
+  <!-- 千本鳥居（遠・中・近＝奥行き） -->
+  <g id="torii-far" fill="#250a12" opacity=".95">
+    <rect x="360" y="552" width="9" height="112"/>
+    <rect x="429" y="552" width="9" height="112"/>
+    <rect x="352" y="546" width="94" height="9"/>
+    <rect x="367" y="576" width="64" height="6"/>
+  </g>
+  <g id="torii-mid" fill="#300b17">
+    <rect x="200" y="600" width="14" height="186"/>
+    <rect x="352" y="600" width="14" height="186"/>
+    <rect x="184" y="586" width="198" height="13"/>
+    <rect x="212" y="626" width="142" height="9"/>
+    <!-- 鳥居の奥に光る狐の眼（まばたきながらじっと見つめる） -->
+    <g>
+      <animate attributeName="opacity" keyTimes="0;0.42;0.5;0.64;0.72;0.9;1"
+        values="0;0;1;1;0;0;0" dur="9s" begin="5s" repeatCount="indefinite"/>
+      <circle cx="268" cy="704" r="14" fill="url(#foxEye)"/>
+      <circle cx="300" cy="704" r="14" fill="url(#foxEye)"/>
+      <ellipse cx="270" cy="703" rx="3.2" ry="1.6" fill="#ffd9c0"/>
+      <ellipse cx="298" cy="703" rx="3.2" ry="1.6" fill="#ffd9c0"/>
+    </g>
+  </g>
+  <g id="torii-near" fill="#18060a">
+    <rect x="10"  y="600" width="26" height="320"/>
+    <rect x="252" y="600" width="26" height="320"/>
+    <rect x="-22" y="578" width="330" height="22"/>
+    <rect x="28"  y="636" width="232" height="13"/>
+    <!-- 提灯（揺れる） -->
+    <g>
+      <g>
+        <animateTransform attributeName="transform" type="rotate"
+          values="0 143 664;4 143 664;0 143 664;-4 143 664;0 143 664" dur="6s" repeatCount="indefinite"/>
+        <circle class="lampG" cx="143" cy="668" r="52" fill="url(#halo)" opacity=".5"/>
+        <line x1="143" y1="650" x2="143" y2="674" stroke="#caa06a" stroke-width="2"/>
+        <rect class="lampB" x="134" y="674" width="18" height="26" rx="6" fill="url(#lampGrad)"/>
+        <rect x="132" y="668" width="22" height="8" rx="3" fill="#7c5228"/>
+        <line x1="143" y1="700" x2="143" y2="712" stroke="#caa06a" stroke-width="1.4"/>
+        <circle cx="143" cy="702" r="2.6" fill="#caa06a"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- 右手前の枯れ木と鴉 -->
+  <g stroke="#05060c" stroke-width="13" stroke-linecap="round" fill="none">
+    <path d="M1525,980 C1512,850 1468,770 1418,688 C1402,660 1392,638 1396,616"/>
+  </g>
+  <g stroke="#05060c" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M1418,688 C1448,662 1472,648 1502,632"/>
+    <path d="M1446,718 C1470,700 1480,686 1486,668"/>
+    <path d="M1396,616 C1390,596 1382,584 1370,572"/>
+    <path d="M1502,632 C1512,622 1524,618 1532,612"/>
+  </g>
+  <!-- 鴉 -->
+  <g fill="#04050a">
+    <path d="M1508,616 q7,4 5,13 q-3,6 -10,4 q6,-3 5,-8 q-8,3 -6,-7 q4,-5 6,-2 Z"/>
+    <path d="M1470,690 q6,3 4,11 q-3,5 -8,3 q5,-2 4,-7 q-6,2 -5,-6 q3,-4 5,-1 Z"/>
+  </g>
+
+  <!-- 地面の黒帯（手前） -->
+  <rect x="0" y="824" width="1600" height="120" fill="#02030a"/>
+</svg>
+
+<div id="blueNight"></div>
+<div id="fxTint"></div>
+<div id="mistWrap">
+  <div class="mistBand a"></div>
+  <div class="mistBand b"></div>
+  <div class="fog" style="left:6%;  animation-delay:0s"></div>
+  <div class="fog" style="left:34%; animation-delay:4s; opacity:.8"></div>
+  <div class="fog" style="left:64%; animation-delay:8s"></div>
+  <div class="fog" style="left:84%; animation-delay:2s; opacity:.6"></div>
+</div>
+<div id="film"></div>
+</div><!-- /fxBack -->
+
+<!-- 開幕カーテン（専用レイヤー） -->
+<div id="intro">
+  <div id="curtainL" class="curtain"></div>
+  <div id="curtainR" class="curtain"></div>
+  <div id="veil"></div>
+</div>
+
+<!-- 縦書きの端書き -->
+<div id="tateL" class="tate">曰く――決して、近づいてはならない場所。</div>
+<div id="tateR" class="tate">逃げられると思うな。<span class="red">呪いは、まだ終わらない。</span></div>
+
+<!-- 残り刻限（呪いが解けた後に現れる：15:00から減る） -->
+<div id="timerBox">
+  <div id="timerLabel" class="mono">残り刻限</div>
+  <div id="timer">--:--</div>
+</div>
+
+<!-- 旧校舎のベル（左上・将来メニューボタンになる） -->
+<figure class="bellFig" id="bellFig" role="button" tabindex="0"
+  aria-label="メニュー" title="メニュー（準備中）">
+  <svg viewBox="0 0 220 150" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <radialGradient id="bellGrad" cx=".5" cy=".3" r=".8">
+        <stop offset="0" stop-color="#9fb0b6"/>
+        <stop offset=".55" stop-color="#5c6b73"/>
+        <stop offset="1" stop-color="#2c3740"/>
+      </radialGradient>
+    </defs>
+    <!-- 吊り金具（揺れない） -->
+    <rect x="84" y="4" width="52" height="11" rx="3" fill="#39454d"/>
+    <rect x="104" y="11" width="12" height="9" fill="#2b343c"/>
+    <!-- 揺れる鐘体＋鐘舌 -->
+    <g class="swing">
+      <path class="bellBody" d="M110,30 C70,30 48,64 48,104 L172,104 C172,64 150,30 110,30 Z" fill="url(#bellGrad)"/>
+      <!-- 状態変化は半透明の色被せのクロスフェードで行う（急変しない） -->
+      <path class="bellTintW" d="M110,30 C70,30 48,64 48,104 L172,104 C172,64 150,30 110,30 Z" fill="#9a6230"/>
+      <path class="bellTintC" d="M110,30 C70,30 48,64 48,104 L172,104 C172,64 150,30 110,30 Z" fill="#8f1e2e"/>
+      <ellipse class="bellRim" cx="110" cy="104" rx="64" ry="9" fill="#3c4850"/>
+      <path d="M66,100 C72,58 92,38 110,38 C121,38 127,47 123,57 C101,52 86,76 79,100 Z" fill="rgba(10,14,18,.34)"/>
+      <g class="bellClap">
+        <line x1="110" y1="104" x2="126" y2="126" stroke="#232c33" stroke-width="5"/>
+        <circle cx="130" cy="133" r="9" fill="#232c33"/>
+      </g>
+    </g>
+  </svg>
+</figure>
+
+<!-- メイン -->
+<main id="stage">
+  <div class="festHead">
+    <p class="eyebrow mono">文化祭ホラーアトラクション</p>
+    <p class="festName">令和８年度　近梅祭</p>
+  </div>
+
+  <!-- 深夜の掛け軸：主タイトル（The Last Bell／旧校舎のベル／転写・ザ・ラストベル／落款・時は満ちた／朱印・呪） -->
+  <div class="kakejiku" id="kakejiku">
+    <div class="axisTop"><i></i><i></i></div>
+    <div class="paper">
+      <div class="stain"></div>
+      <div class="paperBody">
+        <div class="mainCol">
+          <!-- 主文は紙が開くと同時に現れる（一字ずつではない） -->
+          <h1 id="mainTitle" aria-label="THE LAST BELL ― 時は満ちた"></h1>
+          <p class="bellSub">ザ・ラストベル ― 最後の鐘</p>
+        </div>
+        <div class="sideCol">
+          <div class="tateLine" id="sideTate"></div>
+          <span class="sealPaper" aria-hidden="true">呪</span>
+        </div>
+      </div>
+      <p class="inkNote">〜次はお前だ〜</p>
+    </div>
+    <div class="axisBottom"><i></i><i></i></div>
+    <!-- 掛け軸の下辺から垂れる血（cursedで本数が増える） -->
+    <div id="plateDrips"></div>
+    <!-- 風鈴：掛け軸の右下に吊るす（ステージで風が変わり、触れると鳴る） -->
+    <div class="windchime" id="windchime" aria-hidden="true">
+      <svg viewBox="0 0 64 170" preserveAspectRatio="xMidYMid meet">
+        <g class="chimB">
+          <line x1="32" y1="0" x2="32" y2="22" stroke="#93a2a8" stroke-width="1.4"/>
+          <circle cx="32" cy="26" r="4.5" fill="#47545d"/>
+          <line x1="32" y1="30" x2="32" y2="44" stroke="#47545d" stroke-width="2"/>
+          <rect x="20" y="44" width="24" height="5" rx="2" fill="#5f6e77"/>
+          <line class="tube" x1="12" y1="49" x2="12" y2="116" stroke="#a3b6bd" stroke-width="2.8" stroke-linecap="round"/>
+          <line class="tube" x1="23" y1="49" x2="23" y2="138" stroke="#a3b6bd" stroke-width="2.8" stroke-linecap="round"/>
+          <line class="tube" x1="41" y1="49" x2="41" y2="124" stroke="#a3b6bd" stroke-width="2.8" stroke-linecap="round"/>
+          <line class="tube" x1="52" y1="49" x2="52" y2="144" stroke="#a3b6bd" stroke-width="2.8" stroke-linecap="round"/>
+          <g class="hammer">
+            <line x1="32" y1="49" x2="32" y2="94" stroke="#74848c" stroke-width="1.6"/>
+            <circle cx="32" cy="102" r="5.5" fill="#5d6c76"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="story" id="story">
+    <p class="line intro" style="--d:4.5s"><span class="no">序ノ一</span>この学校には、昔から決して近づいてはならない場所が存在する。</p>
+    <p class="line intro" style="--d:5.15s"><span class="no">序ノ二</span>文化祭の準備中、旧校舎の奥で発見された古びた扉。</p>
+    <p class="mid later" style="--d:.3s">✳</p>
+    <p class="line later" style="--d:.65s"><span class="no">序ノ三</span>好奇心に駆られた生徒たちが鍵を壊したその瞬間、<span class="hl">封印されていた呪い</span>が解き放たれた。</p>
+    <p class="line later" style="--d:1.25s"><span class="no">序ノ四</span>閉じ込められたあなたに残された時間はわずか。</p>
+    <p class="line later" style="--d:1.85s"><span class="no">序ノ五</span>館内に散りばめられた謎を解き明かし、この恐怖から生きて脱出せよ。</p>
+  </div>
+
+  <div class="doorArea">
+    <p class="venue mono">場所：旧校舎・最奥の扉<span class="sep">｜</span>制作：一年三組</p>
+    <button id="door" type="button">扉を開ける</button>
+    <div id="whisper" class="whisper"></div>
+  </div>
+</main>
+
+<div class="credit" id="credit">
+  <span class="mono">© 2026 <b>KINDAI UNIVERSITY TOYOOKA SENIOR / JUNIOR HIGH SCHOOL</b></span>
+  <span class="mono">背景：自作ベクター（権利フリー）／ 令和８年度 近梅祭 出し物</span>
+</div>
+
+<!-- 環境アニメ（光塵・符札） -->
+<div id="envLayer"></div>
+
+<!-- マウスフォロー層 -->
+<div id="fxLayer">
+  <div id="fxHalo" class="foxfire"></div>
+  <div id="fxCore" class="foxfire"></div>
+  <div id="fxRipple"></div>
+</div>
+
+<!-- 悪寒フラッシュ -->
+<div id="chill"></div>
+
+<!-- 呪い演出 -->
+<div id="sealFlash"></div>
+<div id="seal">呪</div>
+
+<!-- 天辺から滴る血（JSで血源を増やす） -->
+<div id="bloodDrips"></div>
+<script src="src/script.js"></script>
+</body>
+</html>
+

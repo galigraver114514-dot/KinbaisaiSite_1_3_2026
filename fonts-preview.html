@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>タイトル字体 候補 ― THE LAST BELL</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Creepster&family=Eater&family=Jim+Nightshade&family=Butcherman&family=Nosifer&family=Frijole&family=Pirata+One&family=Metal+Mania&family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0c12; color:#e8e2d2; font-family:"Yu Gothic","Meiryo",sans-serif; padding:34px 4vw 80px}
+  h1{font-size:1rem; letter-spacing:.5em; text-align:center; color:#9aa; margin-bottom:4px; font-weight:400}
+  p.lead{text-align:center; color:#667; font-size:.8rem; margin-bottom:30px}
+  .note{max-width:860px; margin:0 auto 26px; font-size:.78rem; line-height:1.9; color:#889; text-align:center}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); gap:22px; max-width:1300px; margin:0 auto}
+  .card{background:
+      radial-gradient(120% 90% at 14% 0%, rgba(120,150,170,.16), transparent 50%),
+      radial-gradient(90% 80% at 90% 110%, rgba(150,20,40,.18), transparent 60%),
+      linear-gradient(165deg,#171b24,#10131b 70%);
+    border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:26px 26px 20px;
+    box-shadow:0 12px 30px rgba(0,0,0,.45)}
+  .sample{min-height:120px; display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:10px 4px; white-space:nowrap; overflow:hidden}
+  .big{font-size:clamp(30px,6.6vw,74px); line-height:1.05; letter-spacing:.02em; color:#f3ead8;
+    text-shadow:0 3px 6px rgba(0,0,0,.8)}
+  .alt{margin-top:6px; font-size:clamp(14px,2.2vw,22px); opacity:.75; letter-spacing:.12em; white-space:nowrap}
+  .jsub{margin-top:2px; font-size:13px; letter-spacing:.5em; color:#caa; opacity:.8; white-space:nowrap}
+  .meta{margin-top:14px; border-top:1px dashed rgba(255,255,255,.12); padding-top:10px;
+    display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+  .name{font-size:13px; color:#d8e0e8; letter-spacing:.08em}
+  .tag{font-size:11px; color:#a98a8a; text-align:right; line-height:1.5}
+  .washi{background:
+      radial-gradient(120% 90% at 12% 8%, rgba(255,246,220,.5), transparent 45%),
+      linear-gradient(160deg,#f1e8cf,#e4d6b4);
+    border-color:rgba(120,94,52,.5)}
+  .washi .big{color:#33210c; text-shadow:0 1px 0 rgba(255,250,235,.6), 1px 2px 2px rgba(70,45,15,.25)}
+  .washi .jsub{color:#a03040}
+  .washi .name{color:#5a4a30}
+  .washi .tag{color:#8a6a50}
+  footer{text-align:center; margin-top:34px; color:#778; font-size:.85rem; line-height:2}
+  footer b{color:#e6b0a0}
+</style>
+</head>
+<body>
+<h1>主タイトル「THE LAST BELL」字体の候補</h1>
+<p class="lead">暗い画面と和紙の2面で見比べてください → 好みの番号を伝えてください</p>
+<div class="note">選んだら index.html の h1 を差し替えます。サイズは候補ごとに表示しきれる幅まで大きくしてあります（本番では紙幅いっぱいまで拡大します）。</div>
+<div class="grid" id="grid"></div>
+<footer>番号（例「3 の Nosifer」）で指定してください。気になる組み合わせ（例：1 の見出し＋現在の Caveat の副題）も歓迎です。<br><b>※ すべて Google Fonts（OFL）＝商用・改変自由。</b></footer>
+<script>
+const F = [
+  { n: 1, f: "'Jim Nightshade'", tag: '手書き×亡霊。人が書いた字の不気味さ・おすすめ', mode: 'dark' },
+  { n: 2, f: "'Butcherman'",     tag: '血文字の手書き。焦って書いたような恐怖', mode: 'dark' },
+  { n: 3, f: "'Creepster'",      tag: '定番ホラー（The Walking Dead系）。細い崩れ字', mode: 'dark' },
+  { n: 4, f: "'Nosifer'",        tag: '血が滴る尖った字。強烈な血書感', mode: 'dark' },
+  { n: 5, f: "'Pirata One'",     tag: '古い版木／海図の掲示。尖った黒板・碑文らしさ', mode: 'dark' },
+  { n: 6, f: "'Frijole'",        tag: '骸骨の西部看板。ユーモラスでホラー', mode: 'dark' },
+  { n: 7, f: "'Eater'",          tag: '砕けた碑文。以前試した字体（再掲）', mode: 'dark' },
+  { n: 8, f: "'Metal Mania'",    tag: '金属に打ち出した細長い字。工業的', mode: 'dark' },
+  { n: 9, f: "'Rye'",            tag: '以前試した老舗風（再掲）', mode: 'dark' },
+  { n: 10, f: "'Caveat'",        tag: '現在の手書き体（素直・こわさ薄め）', mode: 'dark' },
+  { n: 11, f: "'Special Elite'", tag: '旧タイプライター。記録／通告の匂い', mode: 'dark' }
+];
+const grid = document.getElementById('grid');
+for (const c of F) {
+  const el = document.createElement('div');
+  el.className = 'card' + (c.mode === 'washi' ? ' washi' : '');
+  el.innerHTML =
+    '<div class="sample"><div><div class="big" style="font-family:' + c.f + '">THE LAST BELL</div>' +
+    '<div class="alt" style="font-family:' + c.f + '">The Last Bell</div>' +
+    '<div class="jsub">ザ・ラストベル ― 最後の鐘</div></div></div>' +
+    '<div class="meta"><span class="name">No.' + c.n + '　' + c.f.replace(/'/g, '') + '</span><span class="tag">' + c.tag + '</span></div>';
+  grid.appendChild(el);
+}
+</script>
+</body>
+</html>
