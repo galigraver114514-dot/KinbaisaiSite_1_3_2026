@@ -769,9 +769,40 @@ body.cursed .credit, .credit.in{opacity:.85}
   .bellSub{letter-spacing:.3em; text-indent:.3em; font-size:.5rem}
   #timerBox{bottom:150px}
 }
-/* スマホの縦長画面：背景は月と校舎に寄せて表示（slice で切れて見えないのを防ぐ） */
+/* ---- モバイル夜空（P0・常時非表示、狭い画面のみ表示） ---- */
+#mBg{position:fixed; inset:0; z-index:0; pointer-events:none; display:none;
+  background:
+    radial-gradient(150px 150px at 80% 6%, rgba(247,237,214,.9), transparent 66%),
+    radial-gradient(340px 180px at 80% 6%, rgba(255,240,208,.14), transparent 72%),
+    radial-gradient(90% 55% at 50% 112%, rgba(96,24,44,.35), transparent 72%),
+    linear-gradient(180deg,#04060e 0%,#0a0f24 38%,#120e26 78%,#190d20 100%);
+  overflow:hidden}
+#mBg::before{content:""; position:absolute; inset:0;   /* 星（まばらに） */
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 20%, rgba(219,228,255,.9) 60%, transparent 65%),
+    radial-gradient(1.2px 1.2px at 24% 9%,  rgba(219,228,255,.7) 60%, transparent 65%),
+    radial-gradient(1.4px 1.4px at 34% 32%, rgba(219,228,255,.8) 60%, transparent 65%),
+    radial-gradient(1px   1px   at 9%  56%, rgba(219,228,255,.6) 60%, transparent 65%),
+    radial-gradient(1.5px 1.5px at 47% 18%, rgba(230,236,255,.85) 60%, transparent 65%),
+    radial-gradient(1.2px 1.2px at 62% 42%, rgba(219,228,255,.7) 60%, transparent 65%),
+    radial-gradient(1.6px 1.6px at 88% 34%, rgba(230,236,255,.85) 60%, transparent 65%),
+    radial-gradient(1.2px 1.2px at 97% 62%, rgba(219,228,255,.65) 60%, transparent 65%),
+    radial-gradient(1.3px 1.3px at 40% 78%, rgba(219,228,255,.6) 60%, transparent 65%),
+    radial-gradient(1px   1px   at 72% 92%, rgba(219,228,255,.55) 60%, transparent 65%),
+    radial-gradient(1.4px 1.4px at 55% 60%, rgba(219,228,255,.7) 60%, transparent 65%);
+  opacity:.8}
+/* 呪縛後は月が血に染まる */
+#mBg::after{content:""; position:absolute; inset:0; opacity:0;
+  transition:opacity 7s ease;
+  background:
+    radial-gradient(150px 150px at 80% 6%, rgba(226,38,58,.92), transparent 64%),
+    radial-gradient(340px 190px at 80% 6%, rgba(210,20,40,.3), transparent 72%),
+    radial-gradient(80% 45% at 50% 112%, rgba(140,12,32,.5), transparent 74%)}
+body.cursed #mBg::after{opacity:.9}
+/* スマホの縦長画面：横構図SVGは止め、夜空レイヤーを表示する */
 @media (max-width:560px){
-  #bgScene{transform:translateX(-318px) !important; transition:transform .8s ease}
+  #bgScene{opacity:0 !important}
+  #mBg{display:block}
 }
 
 /* アニメーション抑止ユーザー向け */

@@ -86,11 +86,24 @@
     if (e.key === "Escape" && menu.classList.contains("open")) closeMenu();
   });
 
+  /* 遷移で入ってきたページは、幕が閉じた状態から開く */
+  function playEnter() {
+    let incoming = false;
+    try { incoming = sessionStorage.getItem("ks-in") === "1"; } catch (e) {}
+    if (!incoming) return;
+    try { sessionStorage.removeItem("ks-in"); } catch (e) {}
+    document.body.classList.add("tenter");
+    setTimeout(() => document.body.classList.add("arrive"), 130);
+    setTimeout(() => document.body.classList.remove("tenter", "arrive"), 900);
+  }
+  playEnter();
+
   /* ---------- 遷移：左右から血幕が合わさってから移動 ---------- */
   function go(file) {
     if (!file || file === cur) { closeMenu(); return; }
     closeMenu();
     document.body.classList.add("leaving");
+    try { sessionStorage.setItem("ks-in", "1"); } catch (e) {}
     setTimeout(() => { location.href = file; }, 840);
   }
 })();

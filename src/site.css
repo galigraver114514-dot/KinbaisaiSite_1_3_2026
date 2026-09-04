@@ -18,8 +18,7 @@ body.site-page{
   min-height:100%}
 body.site-page::before{content:""; position:fixed; inset:-30px; pointer-events:none;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='ns'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23ns)' opacity='0.5'/></svg>");
-  opacity:.04; animation:siteFlick 2.4s steps(4) infinite}
-@keyframes siteFlick{0%,100%{opacity:.03}50%{opacity:.06}}
+  opacity:.035}
 .site-page .wrap{position:relative; max-width:860px; margin:0 auto; padding:9vh 4vw 12vh; z-index:1;
   animation:siteIn .8s ease-out}
 @keyframes siteIn{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
@@ -82,6 +81,11 @@ body.bell-open #siteBell{opacity:0; pointer-events:none; transition:opacity .25s
 #trans i:nth-child(2){transform-origin:bottom; transition-delay:.06s}
 #trans i:nth-child(3){transform-origin:top; transition-delay:.12s}
 body.leaving #trans i{transform:scaleY(1)}
+/* 入場：新ページも幕が閉じた状態から始め、その後ゆっくり開く（チラつき防止） */
+body.tenter #trans i{transform:scaleY(1); transition:none}
+body.tenter.arrive #trans i{transform:scaleY(0); transition:transform .6s cubic-bezier(.7,0,.3,1)}
+body.tenter.arrive #trans i:nth-child(2){transition-delay:.08s}
+body.tenter.arrive #trans i:nth-child(3){transition-delay:.16s}
 #trans b{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   font-family:"Yuji Syuku",serif; white-space:nowrap;
   letter-spacing:.38em; text-indent:.38em; color:#e8cfc0;
