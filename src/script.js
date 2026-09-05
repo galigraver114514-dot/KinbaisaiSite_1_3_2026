@@ -617,7 +617,6 @@
      一度メニューを開いたら（= ksBellHint）案内はもう不要なので止める。
   ============================================================ */
   const mFoxEl = document.getElementById("mFox");
-  let mobFox = null, wispBusy = false;   /* モバイル狐火の遊泳マネージャーと連絡用 */
   let gOn = false, gLast = 0, gSpawnAt = 0;
   function gHintDone() {
     try { return sessionStorage.getItem("ksBellHint") === "1"; } catch (e) { return false; }
@@ -659,7 +658,6 @@
     const now = Date.now();
     if (now - gSpawnAt < 1400) return;      /* 連打で狐火が乱れないように */
     gSpawnAt = now;
-    wispBusy = true;                        /* 遊泳を止めて案内の飛行に切り替える */
     const r = t.getBoundingClientRect();
     const ex = r.left + r.width / 2;
     const ey = r.top + r.height / 2;
@@ -679,9 +677,7 @@
       mFoxEl.style.top  = (py + (ey - py) * e - Math.sin(k * Math.PI) * arc) + "px";
       if (k < 1) requestAnimationFrame(step);
       else {
-        wispBusy = false;
-        if (mobFox) mobFox.landed(ex, ey);      /* 着地点から再び遊泳へ */
-        else mFoxEl.style.display = "none";
+        mFoxEl.style.display = "none";
         gLure(t, 1400);
         /* 着地したのがメニューの鐘なら、小さく「チン」と一声（自己申告） */
         if (isBell && AE && actx) bellSoft();
@@ -713,147 +709,6 @@
     }, { passive: true });
   }
 
-  /* ============================================================
-     モバイル：狐火の自動遊泳 ＋ ドラッグ連動（仮想ポインタ）
-     PC の「マウス追従」に相当する動きをタッチで再現する。
-     ・指を離している間：蒼火が夜の中をふわふわ泳ぐ
-     ・空白を押したまま動かす：蒼火が指に寄り添い、掛け軸・ベル
-       （木札）・風鈴・背景が指の方へふんわり傾く
-     ・動かさずに離す（タップ）＝案内の蒼火 gFly が次に触る場所を教える
-     （開幕が終わり、扉の鍵が解けてから始める）
-  ============================================================ */
-  let mobOn = false, mobRaf = null;
-  if (coarse && !reduced && mFoxEl) {
-    const vw = () => innerWidth, vh = () => innerHeight;
-    let mMode = "off";              /* off | roam | drag */
-    let wx = 0, wy = 0, px = 0, py = 0;      /* 狐火の現在位置／ドラッグ位置 */
-    let gx = 0, gy = 0;                      /* 遊泳の目的地 */
-    let kakeReadyM = false;
-    let fBgX = 0, fBgY = 0, fKx = 0, fKy = 0; /* 傾きの平滑値 */
-    let dragId = null, downX = 0, downY = 0, dragging = false;
-    const mFoxShow = () => { if (mFoxEl.style.display !== "block") mFoxEl.style.display = "block"; };
-    const setP = (x, y) => { mFoxEl.style.left = x + "px"; mFoxEl.style.top = y + "px"; };
-    function pickSpot() {
-      const pts = [
-        [vw() * 0.5, vh() * 0.20], [vw() * 0.5, vh() * 0.36],
-        [vw() * 0.72, vh() * 0.30], [vw() * 0.27, vh() * 0.30],
-        [vw() * 0.5, vh() * 0.52],  [vw() * 0.62, vh() * 0.68],
-        [vw() * 0.38, vh() * 0.68], [vw() * 0.5, vh() * 0.60]
-      ];
-      return pts[Math.floor(Math.random() * pts.length)];
-    }
-    function leanWc(x, y) {
-      const wc = document.getElementById("windchime");
-      if (!wc) return;
-      const b = wc.querySelector(".chimB");
-      if (!b) return;
-      if (x < 0) { b.style.transform = ""; return; }
-      const r = wc.getBoundingClientRect();
-      const cxp = r.left + r.width / 2, cyp = r.top + r.height * 0.1;
-      const d = Math.hypot(x - cxp, y - cyp);
-      if (d < 170) {
-        const ang = Math.max(-9, Math.min(9, (x - cxp) / 24));
-        b.style.transform = "rotate(" + ang.toFixed(1) + "deg)";
-      } else b.style.transform = "";
-    }
-    function mobFrame(now) {
-      if (!mobOn) { mFoxEl.style.display = "none"; return; }
-      const menuOn = document.body.classList.contains("bell-open")
-                  || document.body.classList.contains("menu-on");
-      const dragOn = (mMode === "drag" && !wispBusy && !menuOn);
-      /* ---- 狐火の位置 ---- */
-      if (!wispBusy && !menuOn) {
-        mFoxShow();
-        if (dragOn) {
-          wx += (px - wx) * 0.4;
-          wy += (py - wy) * 0.4;
-        } else if (mMode === "roam") {
-          const dx = gx - wx, dy = gy - wy, d = Math.hypot(dx, dy);
-          if (d < 5) { const p = pickSpot(); gx = p[0]; gy = p[1]; }
-          else if (d > 0) {
-            const s = Math.min(0.06 * d, 42);
-            wx += (dx / d) * s;
-            wy += (dy / d) * s;
-          }
-        }
-        setP(wx, wy);
-      } else if (mFoxEl.style.display !== "none") mFoxEl.style.display = "none";
-      /* ---- 傾き（ドラッグ中のみ方向を持ち、離すとゆっくり戻る） ---- */
-      const tX = dragOn ? px : vw() + 130;      /* 画面外＝無指向 */
-      const tY = dragOn ? py : vh() + 130;
-      tiltBell(tX, tY);
-      const dnx = dragOn ? (px / vw() - 0.5) * 2 : 0;
-      const dny = dragOn ? (py / vh() - 0.5) * 2 : 0;
-      if (vw() > 560) {                          /* タブレットなど広い画面は背景も */
-        const bg = document.getElementById("bgScene");
-        if (bg) {
-          const btx = dnx * -10, bty = dny * -7;
-          fBgX += (btx - fBgX) * 0.13;
-          fBgY += (bty - fBgY) * 0.13;
-          bg.style.transform = "translate3d(" + fBgX.toFixed(1) + "px," +
-            fBgY.toFixed(1) + "px,0)";
-        }
-      }
-      if (kakeReadyM && kakejikuEl) {
-        const amp = document.body.classList.contains("cursed") ? 1.2 : 1;
-        const ktx = -dny * 1.5 * amp, kty = dnx * 2.4 * amp;
-        fKx += (ktx - fKx) * 0.13;
-        fKy += (kty - fKy) * 0.13;
-        kakejikuEl.style.transform = "perspective(1100px) rotateX(" +
-          fKx.toFixed(2) + "deg) rotateY(" + fKy.toFixed(2) + "deg)";
-      }
-      leanWc(dragOn ? px : -1, dragOn ? py : -1);
-      mobRaf = requestAnimationFrame(mobFrame);
-    }
-    function isBlank(e) {
-      const t = e.target;
-      if (!t || !t.closest) return true;
-      return !t.closest("button,a,[role='button'],[data-nav],#door,#bellFig,#siteBell,.windchime,.bellTag,.m-close,.mask");
-    }
-    document.addEventListener("pointerdown", (e) => {
-      if (!mobOn || dragId !== null || e.pointerType === "mouse") return;
-      if (!isBlank(e)) return;
-      dragId = e.pointerId != null ? e.pointerId : 0;
-      downX = e.clientX; downY = e.clientY; dragging = false;
-    }, { passive: true });
-    document.addEventListener("pointermove", (e) => {
-      if (!mobOn || dragId === null || (e.pointerId != null ? e.pointerId : 0) !== dragId) return;
-      if (!dragging && Math.hypot(e.clientX - downX, e.clientY - downY) > 16) {
-        dragging = true; mMode = "drag";
-        px = e.clientX; py = e.clientY;
-      } else if (dragging) { px = e.clientX; py = e.clientY; }
-    }, { passive: true });
-    const up = (e) => {
-      if (dragId === null || (e.pointerId != null ? e.pointerId : 0) !== dragId) return;
-      dragId = null;
-      if (dragging) {
-        dragging = false;
-        mMode = "roam";
-        gx = wx; gy = wy;          /* 指を離した場所から泳ぎ出す */
-      }
-      /* タップ（動かさず離す）は何もしない。続く click で gFly が案内する */
-    };
-    document.addEventListener("pointerup", up, { passive: true });
-    document.addEventListener("pointercancel", up, { passive: true });
-    /* 開幕終了・扉の鍵が解けてから、ゆっくり泳ぎ始める */
-    setTimeout(() => {
-      mobOn = true;
-      mMode = "roam";
-      kakeReadyM = true;
-      const p = pickSpot();
-      wx = vw() * 0.5; wy = vh() * 0.36;
-      gx = p[0]; gy = p[1];
-      setP(wx, wy);
-      mobRaf = requestAnimationFrame(mobFrame);
-    }, Math.round((coarse ? 5.6 : 7.6) * 1000) + 900);
-    mobFox = {
-      landed: (x, y) => {
-        if (!mobOn) return;
-        wx = x; wy = y; gx = x; gy = y;
-        mMode = "roam";
-      }
-    };
-  }
 
   /* ============================================================
      タイトルの文字をゆっくり揺らめかせる（可読性を保つ穏やかな動き）
