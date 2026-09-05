@@ -56,12 +56,31 @@
     b.innerHTML = BELL_SVG;
     document.body.appendChild(b);
   }
+  /* 初見向け：ベル（＝メニュー）の下に小さな木札を下げる。
+     一度でもメニューを開いたセッションではもう出さない */
+  function ensureBellTag() {
+    const bell = document.getElementById("bellFig") || document.getElementById("siteBell");
+    if (!bell || bell.querySelector(".bellTag")) return;
+    const tag = document.createElement("span");
+    tag.className = "bellTag";
+    tag.textContent = "メニュー";
+    bell.appendChild(tag);
+  }
+  ensureBellTag();
+  try {
+    if (sessionStorage.getItem("ksBellHint") === "1") document.body.classList.add("hint-off");
+  } catch (e) {}
 
   /* ---------- 開閉 ---------- */
   const menu = document.getElementById("siteMenu");
+  function setHintDone() {
+    try { sessionStorage.setItem("ksBellHint", "1"); } catch (e) {}
+    document.body.classList.add("hint-off");   /* 木札を消す（もう分かっている） */
+  }
   function openMenu() {
     menu.classList.add("open");
     document.body.classList.add("bell-open", "menu-on");
+    setHintDone();
   }
   function closeMenu() {
     menu.classList.remove("open");

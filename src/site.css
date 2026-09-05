@@ -93,3 +93,31 @@ body.tenter.arrive #trans i:nth-child(3){transition-delay:.16s}
 body.leaving #trans b{opacity:.85}
 
 /* P0 上でこのCSSが被らないように（index 側に同じ名前の #intro 等は無関係） */
+
+/* ---------- ベル＝メニュー の小さな木札（初見の案内・初めて開くまで） ---------- */
+.bellFig .bellTag, #siteBell .bellTag{
+  position:absolute; left:50%; top:100%; z-index:2;
+  transform:translateX(-50%) rotate(-1deg); margin-top:2px;
+  white-space:nowrap; line-height:1; user-select:none; cursor:pointer;
+  font-family:"Kaisei Tokumin",serif; font-weight:500;
+  font-size:.56rem; letter-spacing:.18em; text-indent:.18em; color:#e9d9b4;
+  background:linear-gradient(180deg,#4d3a26,#34251a);
+  border:1px solid rgba(0,0,0,.6); border-radius:3px;
+  padding:.34em .78em .42em;
+  box-shadow:inset 0 1px 0 rgba(255,214,150,.12), 0 3px 9px rgba(0,0,0,.55);
+  text-shadow:0 1px 2px rgba(0,0,0,.7);
+  transform-origin:50% -9px;   /* 紐の先を支点に小札らしく振れる */
+  opacity:1; transition:opacity .5s ease;
+  animation:bellTagIn .7s ease backwards}
+.bellTag::before{content:""; display:block; width:1px; height:7px; margin:-7px auto 3px;
+  background:linear-gradient(180deg,rgba(210,185,150,.4),#3c2e1e)}
+@keyframes bellTagIn{
+  from{opacity:0; transform:translateX(-50%) translateY(-5px)}
+  to{opacity:1; transform:translateX(-50%) rotate(-1deg)}}
+/* 入口(P0)は開幕が終わる頃に、他のページは幕が開いてから出す */
+body:not(.site-page) .bellTag{animation-delay:4.3s}
+body.site-page .bellTag{animation-delay:1.05s}
+@media (pointer:coarse){
+  body:not(.site-page) .bellTag{animation-delay:3s}}
+/* 一度メニューを開いたら二度と出さない（#siteBell はID付きなので下位の隠し規則より強く指定） */
+body.hint-off .bellFig .bellTag, body.hint-off #siteBell .bellTag{opacity:0; pointer-events:none; animation:none}

@@ -200,6 +200,8 @@
         "perspective(1100px) rotateX(" + (-ny * 1.6 * amp).toFixed(2) +
         "deg) rotateY(" + (nx * 2.5 * amp).toFixed(2) + "deg)";
     }
+    /* ベルと木札もマウスの方へそっと傾く */
+    tiltBell(mx, my);
     raf = requestAnimationFrame(tick);
   }
   if (reduced || coarse) {
@@ -427,6 +429,41 @@
       }
     });
   }
+
+  /* ---- ベル＋メニューの木札：ポインタの方へはっきり寄る（ゆるい追従）
+     吊り金具を支点に、画面内で左右へ「顔を向ける」ように回る（rotateZ 主体）。
+     近づくほど強く、離れるとゆっくり元へ戻る。木札は小札らしく更に大きく振れる ---- */
+  let bTiltZ = 0, bTiltX = 0, tagLean = 0;
+  function tiltBell(px, py) {
+    if (reduced || !bellFig) return;
+    const r = bellFig.getBoundingClientRect();
+    const bx = r.left + r.width / 2;
+    const by = r.top + r.height * 0.1;          /* 吊り金具のあたり */
+    const dx = px - bx, dy = py - by;
+    const d = Math.hypot(dx, dy);
+    /* 反応範囲を広めに（画面の半分程度まで）。近いほど強い二次減衰 */
+    const R = Math.max(420, Math.min(innerWidth * 0.55, 640));
+    const t = 1 - Math.min(1, d / R);
+    const f = t * t;
+    /* 左右：顔を向ける rotateZ（右へ寄せる＝時計回りで下が左へ行くので −）
+       典型距離（鈴の横 1/4R〜1/3R）で 5〜9° ほどはっきり傾くように係数を出す */
+    const gZ = Math.max(-1, Math.min(1, dx / (R * 0.5))) * -30 * f;
+    const gX = Math.max(-1, Math.min(1, dy / (R * 0.5))) * 6 * f;  /* 奥行きの微かな傾き */
+    bTiltZ += (gZ - bTiltZ) * 0.2;
+    bTiltX += (gX - bTiltX) * 0.2;
+    if (Math.abs(bTiltZ) > 0.05 || Math.abs(bTiltX) > 0.05) {
+      bellFig.style.transform = "perspective(900px) rotateX(" + bTiltX.toFixed(2) +
+        "deg) rotateZ(" + bTiltZ.toFixed(2) + "deg)";
+    } else if (bellFig.style.transform) bellFig.style.transform = "";
+    if (!bellFig._kbTag) bellFig._kbTag = bellFig.querySelector(".bellTag");
+    const tag = bellFig._kbTag;
+    /* 札は鈴とは逆方向に大きく振れて「吊り下がった小札」らしい動きに */
+    const gT = Math.max(-16, Math.min(16, dx / (R * 0.3))) * 15 * f;
+    tagLean += (gT - tagLean) * 0.16;
+    if (tag && Math.abs(tagLean) > 0.05) {
+      tag.style.transform = "translateX(-50%) rotate(" + tagLean.toFixed(2) + "deg)";
+    } else if (tag && tag.style.transform) tag.style.transform = "";
+  }
   const wcEl = document.getElementById("windchime");
   function chimeNote(vol) {
     if (!actx) return;
@@ -570,6 +607,253 @@
     story.classList.add("play");
     if (!reduced) startAmbient();
   });
+
+  /* ============================================================
+     触屏向けの導き（狐火ガイド）
+     マウスの無い端末ではカーソル追従が使えないため、
+     ・何も触らない時間が続くと「次の対象」がふっと蒼く光る
+     ・余白をタップすると、その指先から蒼火が対象へ飛んで行く
+     誘導先は「まだ開いていない扉」→「呪いが解けた後のメニューの鐘」。
+     一度メニューを開いたら（= ksBellHint）案内はもう不要なので止める。
+  ============================================================ */
+  const mFoxEl = document.getElementById("mFox");
+  let mobFox = null, wispBusy = false;   /* モバイル狐火の遊泳マネージャーと連絡用 */
+  let gOn = false, gLast = 0, gSpawnAt = 0;
+  function gHintDone() {
+    try { return sessionStorage.getItem("ksBellHint") === "1"; } catch (e) { return false; }
+  }
+  function gClearLure() {
+    [door, bellFig, document.getElementById("siteBell")].forEach(el => {
+      if (el) el.classList.remove("lure");
+    });
+  }
+  function canGuide() {
+    if (!gOn || reduced || !mFoxEl) return false;
+    if (document.body.classList.contains("bell-open")
+        || document.body.classList.contains("menu-on")) return false;
+    if (gHintDone()) { gOn = false; gClearLure(); return false; }
+    return true;
+  }
+  /* いま導くべき対象：未着手＝扉／呪縛後＝メニューの鐘（警告中は判断を邪魔しない） */
+  function gTarget() {
+    if (!opened && !warnPhase) return door;
+    if (opened) return (bellFig || document.getElementById("siteBell")) || null;
+    return null;
+  }
+  function gLure(el, ms) {
+    if (!el) return;
+    el.classList.add("lure");
+    setTimeout(() => el.classList.remove("lure"), ms);
+  }
+  /* 指が動いていない時に、対象が「ここだよ」と一度だけ光る */
+  function gGlow() {
+    if (!canGuide()) return;
+    const t = gTarget();
+    if (t && !t.classList.contains("lure") && Date.now() - gLast > 7000) {
+      gLure(t, 1500);
+    }
+  }
+  /* 余白タップの指先から、蒼火が対象へ弧を描いて飛んで行く */
+  function gFly(t, px, py) {
+    if (!mFoxEl || !t) return;
+    const now = Date.now();
+    if (now - gSpawnAt < 1400) return;      /* 連打で狐火が乱れないように */
+    gSpawnAt = now;
+    wispBusy = true;                        /* 遊泳を止めて案内の飛行に切り替える */
+    const r = t.getBoundingClientRect();
+    const ex = r.left + r.width / 2;
+    const ey = r.top + r.height / 2;
+    const dist = Math.hypot(ex - px, ey - py);
+    const arc = Math.min(54, dist * 0.24);
+    const dur = Math.min(780, 420 + dist * 0.45);
+    const isBell = (t.id === "bellFig" || t.id === "siteBell");
+    mFoxEl.style.display = "block";
+    mFoxEl.style.left = px + "px";
+    mFoxEl.style.top = py + "px";
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const k = Math.min(1, (ts - t0) / dur);
+      const e = 1 - Math.pow(1 - k, 3);
+      mFoxEl.style.left = (px + (ex - px) * e) + "px";
+      mFoxEl.style.top  = (py + (ey - py) * e - Math.sin(k * Math.PI) * arc) + "px";
+      if (k < 1) requestAnimationFrame(step);
+      else {
+        wispBusy = false;
+        if (mobFox) mobFox.landed(ex, ey);      /* 着地点から再び遊泳へ */
+        else mFoxEl.style.display = "none";
+        gLure(t, 1400);
+        /* 着地したのがメニューの鐘なら、小さく「チン」と一声（自己申告） */
+        if (isBell && AE && actx) bellSoft();
+      }
+    };
+    requestAnimationFrame(step);
+  }
+  if (coarse && !reduced && mFoxEl) {
+    /* 扉の鍵が解けてから案内を始める（それまでは開幕を見せる） */
+    setTimeout(() => {
+      gOn = true;
+      gLast = Date.now();
+      setInterval(gGlow, 8200);
+    }, Math.round((coarse ? 5.6 : 7.6) * 1000) + 900);
+    /* 指の活動で「待ち時間」をリセット */
+    const mark = () => { if (gOn) gLast = Date.now(); };
+    document.addEventListener("pointerdown", mark, { passive: true });
+    document.addEventListener("touchstart", mark, { passive: true });
+    /* 余白タップ → 蒼火が対象へ飛ぶ（操作対象そのものは通常動作に任せる） */
+    window.addEventListener("click", (e) => {
+      if (!canGuide()) return;
+      const t = gTarget();
+      if (!t || t.classList.contains("locked")) return;
+      const tg = e.target && e.target.closest
+        ? e.target.closest("button,a,[role='button'],[data-nav],#door,#bellFig,#siteBell,.windchime,.bellTag,.m-close,.mask")
+        : null;
+      if (tg) return;
+      gFly(t, e.clientX, e.clientY);
+    }, { passive: true });
+  }
+
+  /* ============================================================
+     モバイル：狐火の自動遊泳 ＋ ドラッグ連動（仮想ポインタ）
+     PC の「マウス追従」に相当する動きをタッチで再現する。
+     ・指を離している間：蒼火が夜の中をふわふわ泳ぐ
+     ・空白を押したまま動かす：蒼火が指に寄り添い、掛け軸・ベル
+       （木札）・風鈴・背景が指の方へふんわり傾く
+     ・動かさずに離す（タップ）＝案内の蒼火 gFly が次に触る場所を教える
+     （開幕が終わり、扉の鍵が解けてから始める）
+  ============================================================ */
+  let mobOn = false, mobRaf = null;
+  if (coarse && !reduced && mFoxEl) {
+    const vw = () => innerWidth, vh = () => innerHeight;
+    let mMode = "off";              /* off | roam | drag */
+    let wx = 0, wy = 0, px = 0, py = 0;      /* 狐火の現在位置／ドラッグ位置 */
+    let gx = 0, gy = 0;                      /* 遊泳の目的地 */
+    let kakeReadyM = false;
+    let fBgX = 0, fBgY = 0, fKx = 0, fKy = 0; /* 傾きの平滑値 */
+    let dragId = null, downX = 0, downY = 0, dragging = false;
+    const mFoxShow = () => { if (mFoxEl.style.display !== "block") mFoxEl.style.display = "block"; };
+    const setP = (x, y) => { mFoxEl.style.left = x + "px"; mFoxEl.style.top = y + "px"; };
+    function pickSpot() {
+      const pts = [
+        [vw() * 0.5, vh() * 0.20], [vw() * 0.5, vh() * 0.36],
+        [vw() * 0.72, vh() * 0.30], [vw() * 0.27, vh() * 0.30],
+        [vw() * 0.5, vh() * 0.52],  [vw() * 0.62, vh() * 0.68],
+        [vw() * 0.38, vh() * 0.68], [vw() * 0.5, vh() * 0.60]
+      ];
+      return pts[Math.floor(Math.random() * pts.length)];
+    }
+    function leanWc(x, y) {
+      const wc = document.getElementById("windchime");
+      if (!wc) return;
+      const b = wc.querySelector(".chimB");
+      if (!b) return;
+      if (x < 0) { b.style.transform = ""; return; }
+      const r = wc.getBoundingClientRect();
+      const cxp = r.left + r.width / 2, cyp = r.top + r.height * 0.1;
+      const d = Math.hypot(x - cxp, y - cyp);
+      if (d < 170) {
+        const ang = Math.max(-9, Math.min(9, (x - cxp) / 24));
+        b.style.transform = "rotate(" + ang.toFixed(1) + "deg)";
+      } else b.style.transform = "";
+    }
+    function mobFrame(now) {
+      if (!mobOn) { mFoxEl.style.display = "none"; return; }
+      const menuOn = document.body.classList.contains("bell-open")
+                  || document.body.classList.contains("menu-on");
+      const dragOn = (mMode === "drag" && !wispBusy && !menuOn);
+      /* ---- 狐火の位置 ---- */
+      if (!wispBusy && !menuOn) {
+        mFoxShow();
+        if (dragOn) {
+          wx += (px - wx) * 0.4;
+          wy += (py - wy) * 0.4;
+        } else if (mMode === "roam") {
+          const dx = gx - wx, dy = gy - wy, d = Math.hypot(dx, dy);
+          if (d < 5) { const p = pickSpot(); gx = p[0]; gy = p[1]; }
+          else if (d > 0) {
+            const s = Math.min(0.06 * d, 42);
+            wx += (dx / d) * s;
+            wy += (dy / d) * s;
+          }
+        }
+        setP(wx, wy);
+      } else if (mFoxEl.style.display !== "none") mFoxEl.style.display = "none";
+      /* ---- 傾き（ドラッグ中のみ方向を持ち、離すとゆっくり戻る） ---- */
+      const tX = dragOn ? px : vw() + 130;      /* 画面外＝無指向 */
+      const tY = dragOn ? py : vh() + 130;
+      tiltBell(tX, tY);
+      const dnx = dragOn ? (px / vw() - 0.5) * 2 : 0;
+      const dny = dragOn ? (py / vh() - 0.5) * 2 : 0;
+      if (vw() > 560) {                          /* タブレットなど広い画面は背景も */
+        const bg = document.getElementById("bgScene");
+        if (bg) {
+          const btx = dnx * -10, bty = dny * -7;
+          fBgX += (btx - fBgX) * 0.13;
+          fBgY += (bty - fBgY) * 0.13;
+          bg.style.transform = "translate3d(" + fBgX.toFixed(1) + "px," +
+            fBgY.toFixed(1) + "px,0)";
+        }
+      }
+      if (kakeReadyM && kakejikuEl) {
+        const amp = document.body.classList.contains("cursed") ? 1.2 : 1;
+        const ktx = -dny * 1.5 * amp, kty = dnx * 2.4 * amp;
+        fKx += (ktx - fKx) * 0.13;
+        fKy += (kty - fKy) * 0.13;
+        kakejikuEl.style.transform = "perspective(1100px) rotateX(" +
+          fKx.toFixed(2) + "deg) rotateY(" + fKy.toFixed(2) + "deg)";
+      }
+      leanWc(dragOn ? px : -1, dragOn ? py : -1);
+      mobRaf = requestAnimationFrame(mobFrame);
+    }
+    function isBlank(e) {
+      const t = e.target;
+      if (!t || !t.closest) return true;
+      return !t.closest("button,a,[role='button'],[data-nav],#door,#bellFig,#siteBell,.windchime,.bellTag,.m-close,.mask");
+    }
+    document.addEventListener("pointerdown", (e) => {
+      if (!mobOn || dragId !== null || e.pointerType === "mouse") return;
+      if (!isBlank(e)) return;
+      dragId = e.pointerId != null ? e.pointerId : 0;
+      downX = e.clientX; downY = e.clientY; dragging = false;
+    }, { passive: true });
+    document.addEventListener("pointermove", (e) => {
+      if (!mobOn || dragId === null || (e.pointerId != null ? e.pointerId : 0) !== dragId) return;
+      if (!dragging && Math.hypot(e.clientX - downX, e.clientY - downY) > 16) {
+        dragging = true; mMode = "drag";
+        px = e.clientX; py = e.clientY;
+      } else if (dragging) { px = e.clientX; py = e.clientY; }
+    }, { passive: true });
+    const up = (e) => {
+      if (dragId === null || (e.pointerId != null ? e.pointerId : 0) !== dragId) return;
+      dragId = null;
+      if (dragging) {
+        dragging = false;
+        mMode = "roam";
+        gx = wx; gy = wy;          /* 指を離した場所から泳ぎ出す */
+      }
+      /* タップ（動かさず離す）は何もしない。続く click で gFly が案内する */
+    };
+    document.addEventListener("pointerup", up, { passive: true });
+    document.addEventListener("pointercancel", up, { passive: true });
+    /* 開幕終了・扉の鍵が解けてから、ゆっくり泳ぎ始める */
+    setTimeout(() => {
+      mobOn = true;
+      mMode = "roam";
+      kakeReadyM = true;
+      const p = pickSpot();
+      wx = vw() * 0.5; wy = vh() * 0.36;
+      gx = p[0]; gy = p[1];
+      setP(wx, wy);
+      mobRaf = requestAnimationFrame(mobFrame);
+    }, Math.round((coarse ? 5.6 : 7.6) * 1000) + 900);
+    mobFox = {
+      landed: (x, y) => {
+        if (!mobOn) return;
+        wx = x; wy = y; gx = x; gy = y;
+        mMode = "roam";
+      }
+    };
+  }
 
   /* ============================================================
      タイトルの文字をゆっくり揺らめかせる（可読性を保つ穏やかな動き）

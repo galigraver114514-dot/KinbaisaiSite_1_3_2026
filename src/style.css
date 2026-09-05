@@ -358,7 +358,8 @@ body.cursed .mainCol{animation:txtShiver .42s linear 2}
 .bellFig{position:fixed; top:14px; left:38px; z-index:45; pointer-events:auto;
   cursor:pointer; outline:none; will-change:transform;
   width:min(11.5vw,132px); filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));
-  transition:filter .4s ease, opacity .4s ease}
+  transition:filter .4s ease, opacity .4s ease;
+  transform-origin:50% 10%}   /* ポインタ追従の支点＝吊り金具 */
 .bellFig svg{width:100%; height:auto; overflow:visible}
 .bellFig:hover,.bellFig:focus-visible{filter:drop-shadow(0 10px 20px rgba(140,10,26,.6)) brightness(1.18)}
 .bellFig:active svg{transform:scale(.97)}
@@ -699,6 +700,13 @@ body.cursed .credit, .credit.in{opacity:.85}
 #fxRipple.pop{animation:rippleGo .9s ease-out forwards}
 @keyframes rippleGo{0%{opacity:.9; width:6px; height:6px}
   100%{opacity:0; width:190px; height:190px}}
+
+/* 触屏の導きの蒼火：タップ地点から対象へ飛ぶ（軽量・スマホのみ表示） */
+#mFox{display:none; position:fixed; left:-60px; top:-60px; z-index:66; pointer-events:none;
+  width:24px; height:24px; border-radius:50%; opacity:.95; mix-blend-mode:screen;
+  background:radial-gradient(circle, #eaffff 0%, #9adcff 42%, rgba(90,170,255,0) 76%);
+  filter:drop-shadow(0 0 12px rgba(130,205,255,.9));
+  transform:translate(-50%,-50%); will-change:left,top}
 
 /* ============================================================
    6. タブレット/モバイル（ポインタなし）調整
