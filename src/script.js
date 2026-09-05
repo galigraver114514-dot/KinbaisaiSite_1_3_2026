@@ -129,17 +129,25 @@
 
   /* ゆっくり追いかける蒼い光（近くの操作対象へ「吸われる」） */
   let cx = mx, cy = my, hx = mx, hy = my, raf = null;
+  let curPull = 0;                       /* 引き寄せの強さ（なめらかに変化させる） */
   function drawTail(at) {
     trailDots.forEach((d, i) => {
+      let tx = cx, ty = cy;
       if (at) {
         /* 狐火から対象へ伸びる引き寄せの尾 */
         const t = (N_DOTS - i) / N_DOTS;
-        d.style.left = (cx + (at.x - cx) * t * at.pull) + "px";
-        d.style.top  = (cy + (at.y - cy) * t * at.pull) + "px";
+        tx = cx + (at.x - cx) * t * at.pull;
+        ty = cy + (at.y - cy) * t * at.pull;
       } else {
-        const p = hist[i * 6] || hist[hist.length - 1];
-        if (p) { d.style.left = p[0] + "px"; d.style.top = p[1] + "px"; }
+        /* 停止したら狐火の位置へ収まる（尾が残らないように） */
+        tx = cx; ty = cy;
       }
+      if (d._x === undefined) { d._x = tx; d._y = ty; }
+      const k = Math.max(0.07, 0.44 - i * 0.04);   /* 尾先ほど遅れて追う */
+      d._x += (tx - d._x) * k;
+      d._y += (ty - d._y) * k;
+      d.style.left = d._x.toFixed(1) + "px";
+      d.style.top  = d._y.toFixed(1) + "px";
     });
   }
   function tick() {
@@ -160,9 +168,12 @@
       const d = Math.hypot(mx - ex, my - ey);
       if (d < bestD) { bestD = d; bestEl = el; bcx = ex; bcy = ey; }
     }
-    const pull = (bestEl && bestD < LURE_R) ? 1 - bestD / LURE_R : 0;
+    const targetPull = (bestEl && bestD < LURE_R) ? 1 - bestD / LURE_R : 0;
+    /* 近づく/離れるで強さが急変しないよう、ゆっくり追従させる */
+    curPull += (targetPull - curPull) * (targetPull > curPull ? 0.12 : 0.09);
+    const pull = curPull < 0.03 ? 0 : curPull;
     const at = pull > 0 ? { x: bcx, y: bcy, pull: pull, el: bestEl } : null;
-    if (at) {
+    if (at && pull > 0.1) {
       if (lastLured !== at.el) {
         if (lastLured) lastLured.classList.remove("lure");
         lastLured = at.el;
@@ -175,7 +186,7 @@
     /* 狐火の目標点＝カーソルと対象の中間（近いほど対象寄り） */
     const fx = at ? mx + (at.x - mx) * 0.6 * at.pull : mx;
     const fy = at ? my + (at.y - my) * 0.6 * at.pull : my;
-    const spd = 0.16 + (at ? 0.3 * at.pull : 0);
+    const spd = 0.2 + (at ? 0.3 * at.pull : 0);
     cx += (fx - cx) * spd;
     cy += (fy - cy) * spd;
     hx += (mx - hx) * 0.055;

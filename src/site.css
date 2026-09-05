@@ -121,3 +121,43 @@ body.site-page .bellTag{animation-delay:1.05s}
   body:not(.site-page) .bellTag{animation-delay:3s}}
 /* 一度メニューを開いたら二度と出さない（#siteBell はID付きなので下位の隠し規則より強く指定） */
 body.hint-off .bellFig .bellTag, body.hint-off #siteBell .bellTag{opacity:0; pointer-events:none; animation:none}
+
+/* ============================================================
+   site.css 追補：サブページ(P1〜P5・会場案内)共通の狐火＋左ベル伸縮
+   P0(index.html) は body.site-page を持たず style.css 側で独自実装。
+   ・#siteBell は普段は上に収納。蒼い狐火（カーソル）が近づくと
+     ベルが降りてきて、狐火が吸い寄せられる。離れると再び収納。
+============================================================ */
+body.site-page #fxLayer{position:fixed; inset:0; z-index:65; pointer-events:none; overflow:hidden}
+body.site-page #fxLayer .foxfire{position:absolute; border-radius:50%; mix-blend-mode:screen;
+  will-change:transform; transform:translate(-50%,-50%)}
+body.site-page #fxHalo{width:150px; height:150px;
+  background:radial-gradient(circle, rgba(154,220,255,.20) 0%, rgba(70,130,230,.09) 42%, transparent 72%)}
+body.site-page #fxCore{width:25px; height:25px;
+  background:radial-gradient(circle, #eaffff 0%, #9adcff 38%, rgba(90,170,255,0) 72%);
+  filter:blur(1px) drop-shadow(0 0 12px rgba(120,205,255,.9))}
+body.site-page .trailDot{position:absolute; border-radius:50%; mix-blend-mode:screen;
+  will-change:left,top; transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(170,225,255,.85) 0%, rgba(120,60,190,0) 72%)}
+/* ベル：普段は上に収納 → 狐火が近づくと降りてくる */
+body.site-page #siteBell{transition:transform .45s cubic-bezier(.55,0,.2,1), opacity .3s ease, filter .25s ease}
+body.site-page #siteBell.b-retract{transform:translateY(-88%); opacity:0; pointer-events:none}
+body.site-page #siteBell.b-up{transform:none; opacity:1}
+body.site-page #siteBell.b-up.lure{filter:drop-shadow(0 10px 24px rgba(130,205,255,.8)) brightness(1.32)}
+body.site-page #siteBell.b-retract .bellTag{opacity:0}
+/* ベルを鳴らした時の揺れ（内側SVGを振る。吸着の回転とは排他） */
+body.site-page #siteBell svg{transform-origin:50% 10%}
+body.site-page #siteBell.rung svg{animation:bellRing .9s ease}
+@keyframes bellRing{0%,100%{transform:rotate(0)}
+  8%{transform:rotate(14deg)} 26%{transform:rotate(-11deg)} 44%{transform:rotate(8deg)}
+  62%{transform:rotate(-5deg)} 80%{transform:rotate(2.5deg)}}
+/* 鐘舌（吊るされた錘）：普段もそっと揺れ、鳴らすと大きく振れる */
+body.site-page #siteBell svg .clap{transform-box:view-box; transform-origin:110px 104px;
+  animation:clapIdle 3.4s ease-in-out infinite alternate}
+@keyframes clapIdle{0%{transform:rotate(1.4deg)}100%{transform:rotate(-1.4deg)}}
+body.site-page #siteBell.rung svg .clap{animation:clapSwing .9s ease}
+@keyframes clapSwing{0%,100%{transform:rotate(0)}
+  8%{transform:rotate(-24deg)} 26%{transform:rotate(20deg)} 44%{transform:rotate(-14deg)}
+  62%{transform:rotate(9deg)} 80%{transform:rotate(-4deg)}}
+/* 最初だけ：狐火がベルへ寄る間にベルを出して見せる */
+body.site-page #siteBell.b-intro{transform:none; opacity:1}

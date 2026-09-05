@@ -37,6 +37,7 @@
     '<path d="M110,30 C70,30 48,64 48,104 L172,104 C172,64 150,30 110,30 Z" fill="url(#bellGrad2)"/>' +
     '<ellipse cx="110" cy="104" rx="64" ry="9" fill="#3c4850"/>' +
     '<path d="M66,100 C72,58 92,38 110,38 C121,38 127,47 123,57 C101,52 86,76 79,100 Z" fill="rgba(10,14,18,.34)"/>' +
+    '<g class="clap"><line x1="110" y1="104" x2="126" y2="126" stroke="#232c33" stroke-width="4.5"/><circle cx="130" cy="133" r="8.5" fill="#232c33"/></g>' +
     '</g></svg>';
 
   if (!document.getElementById("trans")) {
@@ -124,5 +125,172 @@
     document.body.classList.add("leaving");
     try { sessionStorage.setItem("ks-in", "1"); } catch (e) {}
     setTimeout(() => { location.href = file; }, 840);
+  }
+})();
+/* ============================================================
+   site.js 追補：サブページ共通の狐火＋左ベル（収納⇄接近で降臨）
+   P0(index.html) は style.css / script.js の独自狐火を使うので除外。
+   ルール：ベルは普段上に収納。蒼い狐火（カーソル）が近づくと
+   ベルが降りてきて、狐火はベルの方へ吸い寄せられる。離れると収納。
+============================================================ */
+(function () {
+  if (!document.body || !document.body.classList.contains("site-page")) return;
+  if (document.getElementById("fxLayer")) return;
+  const reduced = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const coarse  = !!(window.matchMedia && matchMedia("(pointer: coarse)").matches);
+  const bell = document.getElementById("siteBell");
+  if (!bell) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = "fxLayer";
+  wrap.setAttribute("aria-hidden", "true");
+  wrap.innerHTML = '<div id="fxHalo" class="foxfire"></div><div id="fxCore" class="foxfire"></div>';
+  document.body.appendChild(wrap);
+  const core = document.getElementById("fxCore");
+  const halo = document.getElementById("fxHalo");
+
+  const DOTS = 8, dots = [];
+  for (let i = 0; i < DOTS; i++) {
+    const d = document.createElement("i");
+    d.className = "trailDot";
+    const s = (11 - i) + "px";
+    d.style.width = s; d.style.height = s;
+    d.style.opacity = String(Math.max(0.5 - i * 0.05, 0.06));
+    wrap.appendChild(d);
+    dots.push({ el: d, x: 0, y: 0 });
+  }
+
+  const LURE_R = 260;
+  let px = innerWidth * 0.78, py = innerHeight * 0.32;
+  let cx = px, cy = py, hx = px, hy = py;
+  let up = false, awaySince = 0, intro = true;
+  let bTZ = 0, bTX = 0;                    /* ベルがマウスに顔を向ける角度 */
+  const t0 = performance.now();
+
+  function bellCenter() {
+    const r = bell.getBoundingClientRect();
+    return { x: r.left + r.width * 0.5, y: r.top + r.height * 0.6 };
+  }
+  function setBell(on) {
+    up = on;
+    bell.classList.toggle("b-retract", !on);
+    bell.classList.toggle("b-up", on);
+    bell.classList.remove("b-intro");
+    /* 変形はインラインで確定させる（CSS優先度に依存しない） */
+    bell.style.transition = "transform .5s cubic-bezier(.55,0,.2,1), opacity .3s ease";
+    bell.style.transform = on ? "none" : "translateY(-88%)";
+    bell.style.opacity = on ? "1" : "0";
+    bell.style.pointerEvents = on ? "" : "none";
+  }
+  /* ---- 鳴らす（WebAudioで「ちりーん」を合成。ファイル不要） ---- */
+  let actx = null;
+  function bTone(f, dur, vol, delay) {
+    if (!actx) return;
+    try {
+      const t = actx.currentTime + (delay || 0);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+  function playBell() {
+    if (reduced) return;
+    try {
+      if (!actx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        actx = new AC();
+      }
+      if (actx.state === "suspended") actx.resume();
+      const f = 1520 + Math.random() * 200;
+      bTone(f, 0.9, 0.13, 0);
+      bTone(f * 1.335, 0.55, 0.06, 0.03);
+      bTone(f * 0.5, 0.75, 0.045, 0.08);
+    } catch (e) {}
+  }
+  bell.addEventListener("click", function () {
+    bell.classList.remove("rung");
+    void bell.offsetWidth;
+    bell.classList.add("rung");
+    setTimeout(function () { bell.classList.remove("rung"); }, 960);
+    playBell();
+  });
+  function step(now) {
+    const a = bellCenter();
+    /* 序盤1.4秒：狐火をベルの隣に置いて「ベルが降りる」のを見せる */
+    if (intro) {
+      if (now - t0 < 1400) {
+        px = a.x - 96; py = a.y + 8;
+        if (!up) setBell(true);
+      } else intro = false;
+    }
+    const d = Math.hypot(px - a.x, py - a.y);
+    let lure = 0;
+    if (coarse || reduced) {
+      if (!up) setBell(true);
+      px = innerWidth * 0.5; py = innerHeight * 0.55;
+    } else {
+      if (d < LURE_R) {
+        awaySince = 0;
+        if (!up) setBell(true);
+        lure = Math.max(0, 1 - Math.min(d, LURE_R) / LURE_R);
+      } else if (up) {
+        awaySince = awaySince || now;
+        if (now - awaySince > 620) setBell(false);
+        else lure = 0.05;
+      }
+    }
+    bell.classList.toggle("lure", up && lure > 0.05);
+    let tx = px, ty = py;
+    if (lure > 0.05) { tx = px + (a.x - px) * lure * 0.6; ty = py + (a.y - py) * lure * 0.6; }
+    cx += (tx - cx) * 0.17; cy += (ty - cy) * 0.17;
+    hx += (px - hx) * 0.055; hy += (py - hy) * 0.055;
+    core.style.left = cx + "px"; core.style.top = cy + "px";
+    halo.style.left = hx + "px"; halo.style.top = hy + "px";
+    for (let i = 0; i < DOTS; i++) {
+      let gx = cx, gy = cy;
+      if (lure > 0.05) {
+        const t = (DOTS - i) / DOTS;
+        gx = cx + (a.x - cx) * t * lure;
+        gy = cy + (a.y - cy) * t * lure;
+      }
+      const k = 0.16 + i * 0.035;
+      dots[i].x += (gx - dots[i].x) * k;
+      dots[i].y += (gy - dots[i].y) * k;
+      dots[i].el.style.left = dots[i].x + "px";
+      dots[i].el.style.top  = dots[i].y + "px";
+    }
+    /* ベルがマウスへ顔を向ける（吸着の傾き。P0 と同じ二次減衰） */
+    const rb = bell.getBoundingClientRect();
+    const bpx = rb.left + rb.width / 2, bpy = rb.top + rb.height * 0.12;
+    const ddx = px - bpx, ddy = py - bpy, db = Math.hypot(ddx, ddy);
+    const RR = Math.max(380, Math.min(innerWidth * 0.5, 620));
+    const f2 = up ? (1 - Math.min(1, db / RR)) * (1 - Math.min(1, db / RR)) : 0;
+    const gZ = Math.max(-1, Math.min(1, ddx / (RR * 0.5))) * -22 * f2;
+    const gX = Math.max(-1, Math.min(1, ddy / (RR * 0.5))) * 5 * f2;
+    bTZ += (gZ - bTZ) * 0.2; bTX += (gX - bTX) * 0.2;
+    const bsvg = bell.querySelector("svg");
+    if (bsvg && (Math.abs(bTZ) > 0.05 || Math.abs(bTX) > 0.05)) {
+      bsvg.style.transform = "perspective(900px) rotateX(" + bTX.toFixed(2) + "deg) rotateZ(" + bTZ.toFixed(2) + "deg)";
+    } else if (bsvg && bsvg.style.transform) bsvg.style.transform = "";
+    requestAnimationFrame(step);
+  }
+  window.addEventListener("mousemove", function (e) {
+    px = e.clientX; py = e.clientY;
+    if (intro) intro = false;
+  }, { passive: true });
+
+  if (coarse || reduced) {
+    setBell(true);
+    core.style.left = px + "px"; core.style.top = py + "px";
+    halo.style.left = hx + "px"; halo.style.top = hy + "px";
+    dots.forEach(function (d) { d.x = px; d.y = py; d.el.style.left = px + "px"; d.el.style.top = py + "px"; });
+  } else {
+    requestAnimationFrame(step);
   }
 })();
