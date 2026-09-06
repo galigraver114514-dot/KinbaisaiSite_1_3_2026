@@ -166,6 +166,9 @@
   let up = false, awaySince = 0, intro = true;
   let bTZ = 0, bTX = 0;                    /* ベルがマウスに顔を向ける角度 */
   const t0 = performance.now();
+  /* ホバー中の操作要素を狐火が「包む」（ベルより優先） */
+  const INTERACT = "a,button,input,select,textarea,#siteBell,#planSvg .room,#modeRail button";
+  let hoverEl = null, foxOn = null, ringA = 0;
 
   function bellCenter() {
     const r = bell.getBoundingClientRect();
@@ -229,11 +232,26 @@
         if (!up) setBell(true);
       } else intro = false;
     }
+    /* --- ホバー中の操作要素：狐火で「包む」（他要素の時はベルを引かない） --- */
+    let wrapT = null;
+    if (hoverEl && !hoverEl.closest("#siteMenu")) wrapT = hoverEl;
+    if (foxOn !== wrapT) {
+      if (foxOn) foxOn.classList.remove("foxglow");
+      foxOn = wrapT;
+      if (foxOn) foxOn.classList.add("foxglow");
+    }
+    document.body.classList.toggle("fxwrap", !!wrapT);
+    const wrapOther = !!(wrapT && wrapT !== bell);
     const d = Math.hypot(px - a.x, py - a.y);
     let lure = 0;
     if (coarse || reduced) {
       if (!up) setBell(true);
       px = innerWidth * 0.5; py = innerHeight * 0.55;
+    } else if (wrapOther) {
+      /* ベル以外を包んでいる間はベルの誘引を抑え、そのまま収納へ */
+      awaySince = awaySince || now;
+      if (now - awaySince > 620) setBell(false);
+      else lure = 0.05;
     } else {
       if (d < LURE_R) {
         awaySince = 0;
@@ -245,7 +263,7 @@
         else lure = 0.05;
       }
     }
-    bell.classList.toggle("lure", up && lure > 0.05);
+    bell.classList.toggle("lure", up && lure > 0.05 && !wrapOther);
     let tx = px, ty = py;
     if (lure > 0.05) { tx = px + (a.x - px) * lure * 0.6; ty = py + (a.y - py) * lure * 0.6; }
     cx += (tx - cx) * 0.17; cy += (ty - cy) * 0.17;
@@ -254,7 +272,16 @@
     halo.style.left = hx + "px"; halo.style.top = hy + "px";
     for (let i = 0; i < DOTS; i++) {
       let gx = cx, gy = cy;
-      if (lure > 0.05) {
+      if (wrapT) {
+        /* 要素の周りを蒼火が輪になって遊ぶ */
+        const wb = wrapT.getBoundingClientRect();
+        const wcx = wb.left + wb.width / 2, wcy = wb.top + wb.height / 2;
+        const rx = wb.width / 2 + 18, ry = wb.height / 2 + 14;
+        ringA += 0.05;
+        const ang = (i / DOTS) * Math.PI * 2 + ringA;
+        gx = wcx + Math.cos(ang) * rx;
+        gy = wcy + Math.sin(ang) * ry;
+      } else if (lure > 0.05) {
         const t = (DOTS - i) / DOTS;
         gx = cx + (a.x - cx) * t * lure;
         gy = cy + (a.y - cy) * t * lure;
@@ -283,6 +310,13 @@
   window.addEventListener("mousemove", function (e) {
     px = e.clientX; py = e.clientY;
     if (intro) intro = false;
+    var t = e.target;
+    var el = null;
+    if (t && t.closest) {
+      try { el = t.closest(INTERACT); } catch (err) { el = null; }
+      if (el && el.closest("#siteMenu")) el = null;
+    }
+    hoverEl = el;
   }, { passive: true });
 
   if (coarse || reduced) {

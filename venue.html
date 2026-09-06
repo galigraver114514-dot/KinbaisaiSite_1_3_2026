@@ -134,19 +134,20 @@
   .site-page .rule{animation:ruleGlow 3.6s ease-in-out infinite}
   @keyframes ruleGlow{0%,100%{opacity:.45; box-shadow:0 0 4px rgba(190,60,70,.25)}
     50%{opacity:1; box-shadow:0 0 16px rgba(226,80,90,.6)}}
-  #planCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .05s both,
+  #planCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .72s both,
     cardGlow 3.4s ease-in-out .9s infinite}
-  #exCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .25s both,
+  #exCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .85s both,
     cardGlow 3.4s ease-in-out 1.15s infinite}
   #planLeg{animation:cardUp .95s ease .45s both}
   @keyframes cardUp{from{opacity:0; transform:translateY(30px)}to{opacity:1; transform:none}}
   @keyframes cardGlow{0%,100%{box-shadow:0 26px 90px rgba(0,0,0,.78), 0 0 70px rgba(226,40,70,.05)}
     50%{box-shadow:0 30px 110px rgba(0,0,0,.86), 0 0 100px rgba(226,40,70,.12)}}
+  /* 入場アニメはワイプ(幕)が開き切る後から（~1.0s過ぎ）始める */
   .exBldg{animation:exIn .85s ease backwards}
-  .exBldg:nth-child(1){animation-delay:.42s}
-  .exBldg:nth-child(2){animation-delay:.55s}
-  .exBldg:nth-child(3){animation-delay:.68s}
-  .exBldg:nth-child(4){animation-delay:.81s}
+  .exBldg:nth-child(1){animation-delay:1.02s}
+  .exBldg:nth-child(2){animation-delay:1.15s}
+  .exBldg:nth-child(3){animation-delay:1.28s}
+  .exBldg:nth-child(4){animation-delay:1.41s}
   @keyframes exIn{from{opacity:0; transform:translateY(18px); filter:blur(4px)}
     to{opacity:1; transform:none; filter:none}}
   /* 地図：読込時は明るく走る・段の切替はフラッシュ */
@@ -196,7 +197,12 @@
   @media (min-width:820px){ #exPanel{grid-template-columns:repeat(2, minmax(0, 1fr))} }
 
   /* ============ 一画面レイアウト：地図/並列/展開図 の3モード ============ */
-  body.venue-page{overflow:hidden; height:100vh}
+  body.venue-page{overflow:hidden; height:100vh;
+    /* 操作（キー切替・カードhover等）中にページのテキストが選択されてしまうのを防ぐ */
+    -webkit-user-select:none; -moz-user-select:none; user-select:none}
+  /* 検索・プルダウン等の入力欄は選択・編集できるように戻す */
+  body.venue-page input, body.venue-page select, body.venue-page textarea{
+    -webkit-user-select:text; -moz-user-select:text; user-select:text}
   body.venue-page .wrap{width:100vw; max-width:none; height:100vh; margin:0;
     padding:.6vh 1.1vw .6vh; display:flex; flex-direction:column; z-index:1}
   body.venue-page .vHead{flex:0 0 auto; display:flex; align-items:baseline; gap:1.4em;
@@ -243,6 +249,53 @@
   #wipe i{background:linear-gradient(180deg,#03040b 0%,#0d1124 55%,#070a16 100%);
     box-shadow:0 0 46px rgba(0,0,0,.75)}
   /* cover中は中央に閉じる */
+
+  /* ===== 展開図カード：ホバー時は「幻影カード」をbody最前面へ飛ばす =====
+     元カードは動かさない（hoverが安定）。影カードだけが浮き上がって傾く。 */
+  #exPanel .exBldg{position:relative; transition:opacity .3s ease, filter .3s ease, box-shadow .3s ease}
+  /* 1枚が飛んでいる間だけ他カードを滲ませる */
+  #exPanel.lifting .exBldg:not(.lift-src){
+    filter:blur(1.7px) brightness(.82) saturate(.86)}
+  /* 元カードはわずかに控えめになる（消えない。未来の部屋名クリック操作の土台も兼ねる） */
+  #exPanel .exBldg.lift-src{opacity:.78; filter:blur(.6px) saturate(.9)}
+  /* 飛んでいる影カード：どこにも切られない */
+  .flyCard{position:fixed !important; z-index:10000; margin:0 !important;
+    border-radius:4px; border:1px solid rgba(190,235,255,.9);
+    box-shadow:0 44px 90px rgba(0,0,0,.66), 0 0 70px rgba(140,205,255,.3);
+    transform-origin:50% 50%; will-change:transform,left,top; pointer-events:none;
+    background:#0d1228; overflow:hidden}
+  /* 幻影カード上の光沢：傾き角に応じてJSが毎フレーム動かす（帯・ハイライト・縁光） */
+  .flyCard .gl-sheen,.flyCard .gl-glint,.flyCard .gl-rim{
+    position:absolute; z-index:95; pointer-events:none; mix-blend-mode:screen;
+    will-change:transform,opacity; opacity:0}
+  .flyCard .gl-sheen{top:-10%; bottom:-10%; left:0; width:24%;
+    background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(212,238,255,.14) 26%,
+      rgba(255,255,255,.46) 50%, rgba(212,238,255,.14) 74%, rgba(255,255,255,0) 100%);
+    filter:blur(.6px)}
+  .flyCard .gl-glint{width:56%; height:46%; left:22%; top:27%; border-radius:50%;
+    background:radial-gradient(50% 50% at 50% 50%, rgba(205,238,255,.6) 0%,
+      rgba(175,220,255,.2) 46%, rgba(150,200,255,0) 72%);
+    filter:blur(1px)}
+  .flyCard .gl-rim{left:-6%; right:-6%; bottom:-12%; height:34%; border-radius:50%;
+    background:radial-gradient(50% 60% at 50% 100%, rgba(150,210,255,.38) 0%,
+      rgba(130,190,255,.1) 46%, rgba(120,180,255,0) 72%);
+    filter:blur(1.5px)}
+  /* 幕が閉じている間（ページ入場tenter／モード切替wiping／ページ離脱leaving／未開幕）は
+     地図パネルと展開図パネルをまとめて出さない。幕がすべて開き切ってから淡く現す。 */
+  body.venue-page:not(.arrived) #planCard,
+  body.venue-page:not(.arrived) #exCard,
+  body.venue-page.tenter #planCard,
+  body.venue-page.tenter #exCard,
+  body.venue-page.wiping #planCard,
+  body.venue-page.wiping #exCard,
+  body.venue-page.leaving #planCard,
+  body.venue-page.leaving #exCard{opacity:0; visibility:hidden}
+  body.venue-page.arrived:not(.tenter):not(.wiping):not(.leaving) #planCard,
+  body.venue-page.arrived:not(.tenter):not(.wiping):not(.leaving) #exCard{opacity:1; visibility:visible; transition:opacity .22s ease .02s}
+
+  /* 幻影生成に失敗した時の保険：本体を浮かせる */
+  #exPanel .exBldg.fb{transform:perspective(1500px) translateY(-22px) scale(1.16);
+    z-index:900; box-shadow:0 44px 90px rgba(0,0,0,.66), 0 0 70px rgba(140,205,255,.3)}
 
   /* 下部スライダー（3停止・VHSテープ風のツマミ） */
   #modeBar{flex:0 0 auto; position:relative; z-index:130; display:flex; align-items:center;
@@ -379,6 +432,364 @@
   /* 入場：初期は中央の幕、すこし待って左右へ開く */
   setTimeout(function () { body.classList.add("arrived"); }, 260);
   window.__mode = { flip: flip, cur: function () { return parseInt(body.getAttribute("data-mode") || "1", 10); } };
+})();
+
+/* 展開図カード：hoverで「幻影カード」を最前面へ
+   マウスイベントはexPanelへの委譲にし、進入経路によらず確実に発火させる */
+(function () {
+  var panel = document.getElementById("exPanel");
+  if (!panel) return;
+  var cards = Array.prototype.slice.call(panel.querySelectorAll(".exBldg"));
+  var hoverCard = null;
+  var st = null;          /* {el, t, dir, ry, rx, ryT, rxT, card, g} */
+  var RY = 12, RX = 9;  /* 傾きの最大角：横(rotateY)／縦(rotateX) */
+  var geoWatch = false; /* 幻影がパネル外へ飛び出しても、ポインタが幻影の上に居る間は離脱しない */
+  var leaveT = null, raf = null, last = 0, fallbackOn = false;
+  var retirees = [];    /* 差し替え時に即消さずフェードアウトさせる旧カードの幻影 */
+  var wipeT = null;     /* ワイプ中に .wiping を外すタイマー */
+  var holdUntil = 0;    /* この時刻まで幻影の生成を抑止（入場・切替ワイプ中） */
+  var lastPX = -9999, lastPY = -9999, recheckT = null;  /* 静止マウス再検出用 */
+  window.__cardFX = { enter: 0, leave: 0, ghost: 0, skip: 0, fallback: 0, err: [], log: [],
+    reset: function () {
+      this.enter = this.leave = this.ghost = this.skip = this.fallback = 0;
+      this.err.length = 0; this.log.length = 0;
+    },
+    live: function () {
+      var r = null;
+      if (st && st.el && st.el.isConnected) r = st.el.getBoundingClientRect();
+      return {
+        hover: !!hoverCard,
+        key: hoverCard ? (hoverCard.getAttribute("data-key") || hoverCard.className) : null,
+        ghost: !!st, t: st ? +st.t.toFixed(2) : null, dir: st ? st.dir : null,
+        rect: r ? { l: Math.round(r.left), t: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) } : null,
+        lifting: panel.classList.contains("lifting"),
+        src: hoverCard ? hoverCard.classList.contains("lift-src") : false,
+        geoHold: !!geoWatch,
+        holdMs: Math.round(Math.max(0, holdUntil - performance.now())),
+        tilt: st ? { ry: Math.round(st.ry * 10) / 10, rx: Math.round(st.rx * 10) / 10,
+                     ryT: Math.round(st.ryT), rxT: Math.round(st.rxT) } : null
+      };
+    }
+  };
+  function elTag(el) {
+    if (!el) return "-";
+    if (el.nodeType !== 1) return "#" + el.nodeType;
+    var cn = el.className; if (cn && cn.baseVal !== undefined) cn = cn.baseVal;
+    var k = el.getAttribute ? el.getAttribute("data-key") : null;
+    return (typeof cn === "string" && cn ? "." + cn.trim().split(/\s+/).join(".") : el.tagName) + (k ? "[" + k + "]" : "");
+  }
+  function logEvt(kind, why, e, extra) {
+    var L = window.__cardFX.log;
+    L.push(kind + (why ? ":" + why : "") + " @" + Math.round(performance.now()) + "ms tgt=" +
+      elTag(e && e.target) + " rel=" + elTag(e && e.relatedTarget) + (extra ? " (" + extra + ")" : ""));
+    if (L.length > 16) L.splice(0, L.length - 16);
+  }
+  function ease(o) { return 1 - Math.pow(1 - o, 3); }   /* easeOutCubic */
+  function suppressed() {   /* 幕が開き切るまでは幻影を出さない */
+    return !document.body.classList.contains("arrived") || performance.now() < holdUntil;
+  }
+  function addWipe() {      /* モード切替中：展開図の中身を隠すクラス */
+    document.body.classList.add("wiping");
+    if (wipeT) clearTimeout(wipeT);
+    wipeT = setTimeout(function () { document.body.classList.remove("wiping"); wipeT = null; }, 860);
+  }
+  function startFrame() {
+    if (raf) return;
+    last = performance.now();
+    raf = requestAnimationFrame(frame);
+  }
+  function frame(now) {
+    raf = null;
+    /* rAFのnowは合成器クロックのため直前のlastより古い値を返すことがある（回り込み）。
+       進行時間は主導のperformance.now()で測る（lastと同源・単調） */
+    var nowMs = performance.now();
+    var dt = Math.min(48, nowMs - last); last = nowMs;
+    /* 差し替えで残った旧カードの幻影：独立に素早くフェードアウトさせて掃除する */
+    var keep = false;
+    if (dt > 0 && retirees.length) {
+      for (var i = retirees.length - 1; i >= 0; i--) {
+        var q = retirees[i];
+        q.t -= dt / q.dur;
+        if (q.t <= 0) { q.el.remove(); retirees.splice(i, 1); }
+        else {
+          /* 旧カードは元の位置へ沈みながらフェード（静止フェードだと「瞬消」に見えるため） */
+          var qe = ease(q.t);
+          q.el.style.transform = "perspective(1500px) rotateX(" + (q.rx * qe).toFixed(2) +
+            "deg) rotateY(" + (q.ry * qe).toFixed(2) + "deg) translateY(" + (-22 * qe).toFixed(1) +
+            "px) scale(" + (1 + 0.16 * qe).toFixed(3) + ")";
+          q.el.style.opacity = String(Math.max(0, Math.min(1, q.t)));
+          keep = true;
+        }
+      }
+    }
+    if (!st) {                 /* 幻影が無ければ旧カードの掃除だけで停止 */
+      if (keep) raf = requestAnimationFrame(frame);
+      return;
+    }
+    if (dt > 0) {
+      var sgn = st.dir > 0 ? 1 : (st.dir < 0 ? -1 : 0);   /* dir=0: 持ち上げ完了後のホールド（増減なし） */
+      var spd = (st.dir < 0 && st.fast) ? 260 : 420;      /* 退場は速めに沈める */
+      st.t += sgn * dt / spd;
+    }
+    if (st.t >= 1) { st.t = 1; if (st.dir > 0) st.dir = 0; } /* 浮き上がり完了：傾きのみ */
+    if (st.t <= 0 && st.dir < 0) {   /* 戻り切った時だけ破棄（浮上中は絶対に消さない） */
+      var e0 = st.el; st = null;
+      e0.remove();
+      if (retirees.length) raf = requestAnimationFrame(frame);
+      return;
+    }
+    if (st.t < 0) st.t = 0;
+    var e = ease(st.t);
+    var liftY = -22 * e, sc = 1 + 0.16 * e;
+    var tx = st.ry + (st.ryT - st.ry) * 0.3;
+    var ty = st.rx + (st.rxT - st.rx) * 0.3;
+    st.ry = tx; st.rx = ty;
+    st.el.style.transform =
+      "perspective(1500px) rotateX(" + ty.toFixed(2) + "deg) rotateY(" + tx.toFixed(2) +
+      "deg) translateY(" + liftY.toFixed(1) + "px) scale(" + sc.toFixed(3) + ")";
+    /* 戻り：沈みながら一様にフェードアウト（t=1..0 が opacity=1..0） */
+    if (st.dir < 0) {
+      st.el.style.opacity = String(Math.max(0, Math.min(1, st.t)));
+    }
+    /* 光沢：傾き角で帯が横へスライドし、ハイライトが移動・明滅する */
+    if (st.g && st.t > 0.02) {
+      var ryN = Math.max(-1, Math.min(1, tx / RY));   /* 横傾き -1..1 */
+      var rxN = Math.max(-1, Math.min(1, ty / RX));   /* 縦傾き -1..1 */
+      st.g.sh.style.transform = "translateX(" + (-130 - ryN * 560).toFixed(1) + "%)";
+      st.g.sh.style.opacity = String((0.06 + 0.52 * Math.abs(ryN)) * e);
+      st.g.gl.style.transform = "translate3d(" + (ryN * 46).toFixed(1) + "%, " +
+        (-rxN * 52).toFixed(1) + "%, 0)";
+      st.g.gl.style.opacity = String(Math.min(1, (0.08 + Math.abs(ryN) * 0.4 + Math.abs(rxN) * 0.55) * e));
+      st.g.rm.style.opacity = String((0.1 + 0.55 * e) * (0.5 + 0.5 * Math.abs(ryN)));
+    }
+    raf = requestAnimationFrame(frame);
+  }
+  function spawn(card) {
+    if (st) {
+      if (st.card === card) return;        /* 同じカードの幻影が既に飛んでいる */
+      /* 直前のカードの幻影：即消さず素早くフェードアウトさせてから差し替え（切替が滑らか） */
+      var _prev = st.el, _prevT = st.t;
+      var _ry = st.ry, _rx = st.rx;
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      st = null;
+      if (_prev) {
+        _prev.style.opacity = "1";
+        retirees.push({ el: _prev, t: Math.max(_prevT, 0.12), dur: 240, ry: _ry, rx: _rx });
+        startFrame();
+      }
+    }
+    try {
+      var r = card.getBoundingClientRect();
+      var c = card.cloneNode(true);
+      c.classList.add("flyCard");
+      c.classList.remove("lift-src", "foxglow", "lure");
+      c.removeAttribute("id");
+      c.style.left = r.left + "px";
+      c.style.top = r.top + "px";
+      c.style.width = r.width + "px";
+      c.style.height = r.height + "px";
+      c.style.animation = "none";      /* クローンが exIn 入場アニメ等を引き継がない（CSSアニメが内蔵transformを上書きするため） */
+      c.style.transition = "none";
+      var gSh = document.createElement("i"), gGl = document.createElement("i"), gRm = document.createElement("i");
+      gSh.className = "gl-sheen"; gGl.className = "gl-glint"; gRm.className = "gl-rim";
+      [gSh, gGl, gRm].forEach(function (x) { x.setAttribute("aria-hidden", "true"); c.appendChild(x); });
+      document.body.appendChild(c);
+      st = { el: c, t: 0, dir: 1, ry: 0, rx: 0, ryT: 0, rxT: 0, card: card,
+             g: { sh: gSh, gl: gGl, rm: gRm } };
+      window.__cardFX.ghost++;
+      startFrame();
+      /* 保険：幻影がまともに描画されない環境では本体を浮かせる */
+      fallbackOn = false;
+      setTimeout(function () {
+        if (st && st.el && !document.body.contains(st.el)) { fb(card); }
+        else if (st && st.el && st.el.getBoundingClientRect().width === 0) { fb(card); }
+      }, 260);
+    } catch (err) {
+      window.__cardFX.err.push(String(err));
+      fb(card);
+    }
+  }
+  function fb(card) {                 /* 幻影失敗時のフォールバック */
+    if (fallbackOn || !card) return;
+    fallbackOn = true;
+    window.__cardFX.fallback++;
+    card.classList.add("fb");
+  }
+  /* 傾きの目標値：動かない元カードを基準にポインタ位置から算出。
+     持ち上がり中(dir=1)でも有効＝「飛び出しながら傾く」。 */
+  function tiltAt(x, y) {
+    if (!st || !hoverCard) return;
+    var r = hoverCard.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    var nx = Math.max(-1, Math.min(1, ((x - r.left) / r.width - 0.5) * 2));
+    var ny = Math.max(-1, Math.min(1, ((y - r.top) / r.height - 0.5) * 2));
+    st.ryT = nx * RY;
+    st.rxT = -ny * RX;
+    if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+  }
+  function tilt(e) { tiltAt(e.clientX, e.clientY); }
+  function scheduleRecheck(ms) {
+    if (recheckT) clearTimeout(recheckT);
+    recheckT = setTimeout(function () {
+      recheckT = null;
+      if (lastPX > -9000) checkHoverAt(lastPX, lastPY);
+    }, ms);
+  }
+  function checkHoverAt(x, y) {
+    if (hoverCard || st || suppressed()) return;
+    var ex = document.getElementById("exCard");
+    if (!ex) return;
+    var es = getComputedStyle(ex);
+    if (es.display === "none" || es.visibility === "hidden") return;
+    var cs = getComputedStyle(panel);
+    if (cs.display === "none" || cs.visibility === "hidden") return;
+    var el = document.elementFromPoint(x, y);
+    if (!el || !el.closest) return;
+    var c = el.closest(".exBldg");
+    if (!c || !panel.contains(c)) return;
+    enter(c);
+  }
+  function dismiss() {
+    if (!st) return;
+    st.dir = -1;
+    if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+  }
+  function enter(card) {
+    if (suppressed()) {                     /* 入場・切替ワイプが開き切るまで幻影を出さない */
+      window.__cardFX.skip++;
+      logEvt("skip", "wipe", null, elTag(card));
+      return;
+    }
+    window.__cardFX.enter++;
+    logEvt("enter", "over", null, elTag(card));
+    if (leaveT) { clearTimeout(leaveT); leaveT = null; }
+    if (hoverCard && hoverCard !== card) {
+      /* 別カードへ移った：旧カードの幻影は即消さず素早くフェードアウトさせて
+         新しいカードと立て直す（追従は遅らせず、直消しの硬さも無くす） */
+      logEvt("drop", "switch", null, elTag(hoverCard) + " -> " + elTag(card));
+      var _prev = (st && st.el) ? st.el : null, _prevT = st ? st.t : 1;
+      var _ry = st ? st.ry : 0, _rx = st ? st.rx : 0;
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      st = null;
+      if (_prev) {
+        _prev.style.opacity = "1";
+        retirees.push({ el: _prev, t: Math.max(_prevT, 0.12), dur: 240, ry: _ry, rx: _rx });
+        startFrame();
+      }
+      hoverCard.classList.remove("lift-src", "fb");
+      fallbackOn = false;
+    }
+    hoverCard = card;
+    card.classList.add("lift-src");
+    panel.classList.add("lifting");
+    spawn(card);
+  }
+  function leave(card, why) {
+    if (!card || hoverCard !== card) return;
+    geoWatch = false;
+    window.__cardFX.leave++;
+    logEvt("leave", why || "exit", null, elTag(card));
+    hoverCard = null;
+    card.classList.remove("lift-src", "fb");
+    fallbackOn = false;
+    if (st) st.fast = true;   /* 退場は素早く沈め、他カードの滲み(blur)も早く戻す */
+    dismiss();
+    leaveT = setTimeout(function () {
+      panel.classList.remove("lifting");
+      leaveT = null;
+    }, 300);
+  }
+  /* exPanelへの委譲：mouseover/mouseoutはカードの子要素を渡っても確実に拾える */
+  panel.addEventListener("mouseover", function (e) {
+    var t0 = e.target;
+    if (t0 && st && st.el && st.el.contains(t0)) { window.__cardFX.skip++; return; }  /* 幻影の子要素は無視（保険） */
+    var c = t0 && t0.closest ? t0.closest(".exBldg") : null;
+    if (!c) return;                                /* カード外の隙間へは現状維持（スティッキー） */
+    if (c === hoverCard) { window.__cardFX.skip++; return; }  /* 同じカード内の子要素移動 */
+    geoWatch = false;
+    enter(c);
+    /* 進入した位置を基準に最初から傾ける（動かさなくても飛び出し中に傾く） */
+    if (st && hoverCard === c && e.clientX !== undefined) tiltAt(e.clientX, e.clientY);
+  });
+  /* mousemove は document で受ける：幻影がパネル上端を越えて飛び出した場所でも傾きを追える */
+  function geoStep(e) {
+    if (!st || !st.el || !hoverCard) { geoWatch = false; return; }
+    var r = st.el.getBoundingClientRect(), m = 18;
+    if (e.clientX >= r.left - m && e.clientX <= r.right + m &&
+        e.clientY >= r.top - m && e.clientY <= r.bottom + m) return;   /* まだ幻影の上 */
+    var cr = hoverCard.getBoundingClientRect();
+    if (e.clientX >= cr.left && e.clientX <= cr.right &&
+        e.clientY >= cr.top && e.clientY <= cr.bottom) return;         /* 元カードの上 */
+    var under = document.elementFromPoint(e.clientX, e.clientY);
+    if (under && panel.contains(under)) return;   /* パネル内の隙間は従来どおり保持（スティッキー） */
+    geoWatch = false;
+    leave(hoverCard, "exit");
+  }
+  document.addEventListener("mousemove", function (e) {
+    lastPX = e.clientX; lastPY = e.clientY;   /* 静止マウス再検出のため座標だけ常時記録 */
+    if (geoWatch) geoStep(e);
+    tilt(e);
+  });
+  panel.addEventListener("mouseout", function (e) {
+    if (!hoverCard) return;
+    var to = e.relatedTarget;
+    if (to && st && st.el && st.el.contains(to)) { window.__cardFX.skip++; return; }  /* 幻影へ抜けたのも内部扱い */
+    if (to && to.closest && to.closest(".exBldg") === hoverCard) { window.__cardFX.skip++; return; }
+    if (to && panel.contains(to)) { window.__cardFX.skip++; return; }
+    /* パネル外に出たがポインタは最前面の幻影カードの上：飛び出したカードを
+       追いかけて上端を越えても誤って引っ込めない。幻影の外へ出たら終了する。 */
+    if (st && st.el && e.clientX !== undefined) {
+      var r = st.el.getBoundingClientRect(), m = 16;
+      if (e.clientX >= r.left - m && e.clientX <= r.right + m &&
+          e.clientY >= r.top - m && e.clientY <= r.bottom + m) {
+        geoWatch = true;
+        window.__cardFX.skip++;
+        logEvt("keep", "over-ghost", e);
+        return;
+      }
+    }
+    geoWatch = false;
+    leave(hoverCard, "exit");
+  });
+  window.addEventListener("blur", function () {    /* ウィンドウから外れた時も確実に仕舞う */
+    if (hoverCard) leave(hoverCard, "blur");
+  });
+  /* 幻影の始末：モード切替（rail／←→キー／__mode.flip すべて）とページ離脱で走る。
+     rail/キーは内部flipを直接呼ぶため __mode.flip のラップでは拾えない。
+     body の arrived（モード切替の閉幕）と leaving（ページ離脱）を監視して確実に拾う */
+  function purgeGhost(reason) {
+    var had = !!st || !!retirees.length || !!hoverCard || panel.classList.contains("lifting") || !!leaveT;
+    if (st) { st.el.remove(); st = null; }
+    while (retirees.length) { var qx = retirees.pop(); if (qx.el) qx.el.remove(); }
+    if (leaveT) { clearTimeout(leaveT); leaveT = null; }
+    panel.classList.remove("lifting");
+    cards.forEach(function (c) { c.classList.remove("lift-src", "fb"); });
+    hoverCard = null;
+    geoWatch = false;
+    if (had) logEvt("drop", reason, null, "");
+  }
+  addWipe();                     /* 入場時もワイプが開き切るまでパネルを隠す */
+  holdUntil = performance.now() + 1250;   /* 入場の抑止は幕が開いて淡く出るまで */
+  scheduleRecheck(1300);
+  var hadArrived = document.body.classList.contains("arrived");
+  var hadMenu = document.body.classList.contains("menu-on") || document.body.classList.contains("bell-open");
+  var obsClass = new MutationObserver(function () {
+    var cls = document.body.classList;
+    var menuOn = cls.contains("menu-on") || cls.contains("bell-open");
+    if (menuOn && !hadMenu) purgeGhost("menu");        /* メニューを開いたら幻影を消す */
+    else if (!menuOn && hadMenu) scheduleRecheck(300); /* メニューを閉じた後、静止マウスを再検出 */
+    hadMenu = menuOn;
+    if (cls.contains("leaving")) { purgeGhost("page"); return; }
+    var nowArrived = cls.contains("arrived");
+    if (hadArrived && !nowArrived) {   /* モード切替の閉幕開始：幻影を戻し幕中は隠す */
+      purgeGhost("mode");
+      addWipe();
+      holdUntil = performance.now() + 1100;
+      scheduleRecheck(1160);           /* 開き切ったら静止マウスでも自動で出る */
+    }
+    hadArrived = nowArrived;
+  });
+  try { obsClass.observe(document.body, { attributes: true, attributeFilter: ["class"] }); } catch (err) {}
 })();
 </script>
 <script src="src/site.js"></script>

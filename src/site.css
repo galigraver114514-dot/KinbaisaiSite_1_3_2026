@@ -128,7 +128,8 @@ body.hint-off .bellFig .bellTag, body.hint-off #siteBell .bellTag{opacity:0; poi
    ・#siteBell は普段は上に収納。蒼い狐火（カーソル）が近づくと
      ベルが降りてきて、狐火が吸い寄せられる。離れると再び収納。
 ============================================================ */
-body.site-page #fxLayer{position:fixed; inset:0; z-index:65; pointer-events:none; overflow:hidden}
+/* 狐火はカーソル位置の案内光。カードの幻影(10000)・走査線(9998)より必ず最前面に置く */
+body.site-page #fxLayer{position:fixed; inset:0; z-index:200000; pointer-events:none; overflow:hidden}
 body.site-page #fxLayer .foxfire{position:absolute; border-radius:50%; mix-blend-mode:screen;
   will-change:transform; transform:translate(-50%,-50%)}
 body.site-page #fxHalo{width:150px; height:150px;
@@ -145,6 +146,21 @@ body.site-page #siteBell.b-retract{transform:translateY(-88%); opacity:0; pointe
 body.site-page #siteBell.b-up{transform:none; opacity:1}
 body.site-page #siteBell.b-up.lure{filter:drop-shadow(0 10px 24px rgba(130,205,255,.8)) brightness(1.32)}
 body.site-page #siteBell.b-retract .bellTag{opacity:0}
+/* 要素を狐火で包んでいる間：核を小さくして邪魔せず、対象を蒼く縁取る */
+/* 包んでいる間：核はなめらかに小さく、対象は硬い縁でなく柔らかな光で縁取る */
+body.site-page #fxCore{transition:width .28s ease, height .28s ease}
+body.site-page.fxwrap #fxCore{width:12px; height:12px}
+body.site-page .foxglow{
+  filter:brightness(1.1) drop-shadow(0 0 7px rgba(150,215,255,.65));
+  transition:filter .4s ease}
+body.site-page input.foxglow, body.site-page select.foxglow, body.site-page textarea.foxglow,
+body.site-page button.foxglow, body.site-page a.foxglow{
+  box-shadow:
+    0 0 0 1px rgba(150,215,255,.22),
+    0 0 16px rgba(125,205,255,.30),
+    0 0 40px rgba(110,190,255,.13);
+  transition:box-shadow .5s ease, filter .4s ease;
+  outline:none}
 /* ベルを鳴らした時の揺れ（内側SVGを振る。吸着の回転とは排他） */
 body.site-page #siteBell svg{transform-origin:50% 10%}
 body.site-page #siteBell.rung svg{animation:bellRing .9s ease}
