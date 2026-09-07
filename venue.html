@@ -87,8 +87,7 @@
   /* 映像の粒ノイズ（文書と同じ高さに敷いてスクロールでも継ぎ目なし） */
   .scene .vhsnoise{position:absolute; inset:0; z-index:0; pointer-events:none; display:block;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='ns'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='180' height='180' filter='url(%23ns)' opacity='0.7'/></svg>");
-    opacity:.12; animation:noiseFlick 3.6s steps(4) infinite}
-  @keyframes noiseFlick{0%,100%{opacity:.10}25%{opacity:.16}50%{opacity:.07}75%{opacity:.13}}
+    opacity:.1}   /* 全画面ノイズは毎回の再描画が重いため、ちらつきを廃止して静的粒にする */
   .scene .wrap{position:relative; z-index:1}
   /* 走査線＋周辺減光（映像画面として全画面に固定） */
   body.venue-page::after{content:""; position:fixed; inset:0; z-index:9998; pointer-events:none;
@@ -124,9 +123,9 @@
   @keyframes tcFlick{0%,86%,92%,100%{opacity:1}88%{opacity:.35}90%{opacity:.8}}
 
   /* ===== アニメーション（強調版） ===== */
-  .site-page h1{animation:titleBreath 6s ease-in-out infinite, titleJit 7.5s ease-in-out infinite}
-  @keyframes titleBreath{0%,100%{text-shadow:2px 0 0 rgba(255,60,110,.16), -2px 0 0 rgba(70,190,255,.15), 0 0 22px rgba(255,150,60,.20)}
-    50%{text-shadow:2px 0 0 rgba(255,60,110,.28), -2px 0 0 rgba(70,190,255,.26), 0 0 82px rgba(255,185,95,.55)}}
+  /* 文字影の呼吸アニメは毎フレームのテキスト再描画が重いので廃止：静的な文字影＋軽いゆらぎのみ */
+  .site-page h1{animation:titleJit 7.5s ease-in-out infinite;
+    text-shadow:2px 0 0 rgba(255,60,110,.16), -2px 0 0 rgba(70,190,255,.15), 0 0 22px rgba(255,150,60,.2)}
   @keyframes titleJit{0%,88%,100%{transform:none; opacity:1}
     90%{transform:translateX(-1px) skewX(-.6deg); opacity:.92}
     92%{transform:translateX(1.5px) skewX(.4deg)}
@@ -134,14 +133,12 @@
   .site-page .rule{animation:ruleGlow 3.6s ease-in-out infinite}
   @keyframes ruleGlow{0%,100%{opacity:.45; box-shadow:0 0 4px rgba(190,60,70,.25)}
     50%{opacity:1; box-shadow:0 0 16px rgba(226,80,90,.6)}}
-  #planCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .72s both,
-    cardGlow 3.4s ease-in-out .9s infinite}
-  #exCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .85s both,
-    cardGlow 3.4s ease-in-out 1.15s infinite}
+  /* 大パネルの box-shadow 無限アニメ(cardGlow)は毎フレーム再描画になるため廃止。
+     影は各パネルの静的box-shadowで表現し、入場のcardUpだけ残す */
+  #planCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .72s both}
+  #exCard{animation:cardUp .95s cubic-bezier(.2,.7,.2,1) .85s both}
   #planLeg{animation:cardUp .95s ease .45s both}
   @keyframes cardUp{from{opacity:0; transform:translateY(30px)}to{opacity:1; transform:none}}
-  @keyframes cardGlow{0%,100%{box-shadow:0 26px 90px rgba(0,0,0,.78), 0 0 70px rgba(226,40,70,.05)}
-    50%{box-shadow:0 30px 110px rgba(0,0,0,.86), 0 0 100px rgba(226,40,70,.12)}}
   /* 入場アニメはワイプ(幕)が開き切る後から（~1.0s過ぎ）始める */
   .exBldg{animation:exIn .85s ease backwards}
   .exBldg:nth-child(1){animation-delay:1.02s}
@@ -156,12 +153,27 @@
   #planSvgWrap.fx #planSvg{animation:mapFlash .38s ease-out}
   @keyframes mapFlash{0%{filter:brightness(1.9) drop-shadow(0 0 14px rgba(190,225,255,.85)); opacity:.9}
     100%{filter:none; opacity:1}}
-  #planSvg rect.star{animation:starGlow 2.2s ease-in-out infinite}
-  @keyframes starGlow{0%,100%{filter:brightness(1) drop-shadow(0 0 3px rgba(255,90,70,.5))}
-    50%{filter:brightness(1.65) drop-shadow(0 0 17px rgba(255,132,96,1))}}
-  #planSvg .corr{animation:corrLight 3s ease-in-out infinite}
-  @keyframes corrLight{0%,100%{opacity:.5}50%{opacity:1}}
+  /* SVG全体のfilter/opacityを毎フレーム動かすと地図が丸ごと再描画されるため静止表示に */
+  #planSvg rect.star{fill:#c0392b}
+  #planSvg .corr{opacity:.85}
   #planSvg .room{transition:filter .15s ease}
+  /* ---- 棟の色分け＋ホバーハイライト（右カードhoverと同時・よりはっきり） ---- */
+  #planSvg .bld{transition:stroke-width .2s ease, filter .2s ease, opacity .25s ease}
+  #planSvg .bld.lit{stroke-width:4.5;
+    filter:drop-shadow(0 0 6px var(--bg)) drop-shadow(0 0 14px var(--bg));
+    animation:bldLit 1.5s ease-in-out infinite}
+  @keyframes bldLit{0%,100%{stroke:var(--bg)}
+    50%{stroke:var(--bd)}}
+  #planSvg .ring{fill:none; pointer-events:none; stroke-width:3;
+    transform-box:fill-box; transform-origin:center;
+    animation:bldRing 1.5s cubic-bezier(.2,.6,.3,1) infinite}
+  @keyframes bldRing{0%{transform:scale(1); opacity:1}
+    50%{transform:scale(1.09); opacity:.4}
+    100%{transform:scale(1.09); opacity:0}}
+  /* 右側：ホバー中の棟カードの強調 */
+  #exPanel .exBldg .exName{user-select:none}
+  #exPanel .exBldg.sel{outline:2.5px solid rgba(255,255,255,.8); outline-offset:2px;
+    box-shadow:0 0 22px rgba(255,255,255,.35); filter:brightness(1.08)}
   .exRoom{transition:transform .18s ease, box-shadow .18s ease}
   .exRoom:hover{transform:translateY(-2px) scale(1.03); box-shadow:0 4px 14px rgba(0,0,0,.5)}
   /* カード内：走る光＋ごく淡い走査線（映像の枠らしく） */
@@ -236,7 +248,27 @@
   body.venue-page #planSvg{width:100%; height:100%; max-width:none; max-height:none; margin:0}
   body.venue-page #exCard{padding:.45em .7em}
   body.venue-page #exCard .exHead{font-size:.78rem}
-  body.venue-page #exPanel{flex:1; min-height:0; overflow:auto; margin-top:.4em}
+  body.venue-page #exPanel{flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; margin-top:.4em;
+    position:relative; scrollbar-width:none}   /* 行はgrid本来の挙動に任せ、カード寸法は変えない */
+  body.venue-page #exPanel::-webkit-scrollbar{display:none}
+  /* パネル全体のスライダーは廃止：カード内(.exBod)のスライダーだけで足りる（ホイールは両対応） */
+  /* ---- カード内スクロール：カード寸法は保ったまま、中の階層を内部スクロール ---- */
+  body.venue-page #exPanel .exBldg, .flyCard{display:flex; flex-direction:column}
+  body.venue-page #exPanel .exBldg .exName, .flyCard .exName{flex:0 0 auto}
+  #exPanel .exBldg .exBod, .flyCard .exBod{flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden;
+    position:relative; scrollbar-width:none}
+  #exPanel .exBldg .exBod::-webkit-scrollbar, .flyCard .exBod::-webkit-scrollbar{display:none}
+  #exPanel .exBldg .exBod.pvs2-on, .flyCard .exBod.pvs2-on{padding-right:10px}
+  /* スライダーはスクローラ(.exBod)の外＝カード直下に重ねる。内容に追従しない（top/heightはJSで配置） */
+  .pvs2{position:absolute; right:1px; width:9px; z-index:120; display:none}
+  .pvs2.pvs2-show{display:block}
+  .pvs2 .pv2-track{position:absolute; inset:1px; border-radius:5px;
+    background:rgba(10,14,28,.45); border:1px solid rgba(130,150,215,.22)}
+  .pvs2 .pv2-thumb{position:absolute; left:1px; right:1px; min-height:20px; border-radius:4px;
+    cursor:grab; background:linear-gradient(180deg,#5f6f97,#333e5d);
+    border:1px solid rgba(160,185,240,.42);
+    box-shadow:0 0 6px rgba(100,140,230,.35)}
+  .pvs2 .pv2-thumb:active{cursor:grabbing; background:#7c8dbb}
   body.venue-page .exNote{margin-top:.5em; font-size:.66rem}
 
   /* 中央から開くワイプ（入場・モード切替） */
@@ -544,23 +576,34 @@
     var tx = st.ry + (st.ryT - st.ry) * 0.3;
     var ty = st.rx + (st.rxT - st.rx) * 0.3;
     st.ry = tx; st.rx = ty;
-    st.el.style.transform =
-      "perspective(1500px) rotateX(" + ty.toFixed(2) + "deg) rotateY(" + tx.toFixed(2) +
+    /* 同一内容の書き込みを避ける（同値setでもstyle再計算が走るため） */
+    var ts = "perspective(1500px) rotateX(" + ty.toFixed(2) + "deg) rotateY(" + tx.toFixed(2) +
       "deg) translateY(" + liftY.toFixed(1) + "px) scale(" + sc.toFixed(3) + ")";
+    if (st.el.style.transform !== ts) st.el.style.transform = ts;
     /* 戻り：沈みながら一様にフェードアウト（t=1..0 が opacity=1..0） */
     if (st.dir < 0) {
-      st.el.style.opacity = String(Math.max(0, Math.min(1, st.t)));
+      var opv = String(Math.max(0, Math.min(1, st.t)));
+      if (st.el.style.opacity !== opv) st.el.style.opacity = opv;
     }
     /* 光沢：傾き角で帯が横へスライドし、ハイライトが移動・明滅する */
     if (st.g && st.t > 0.02) {
       var ryN = Math.max(-1, Math.min(1, tx / RY));   /* 横傾き -1..1 */
       var rxN = Math.max(-1, Math.min(1, ty / RX));   /* 縦傾き -1..1 */
-      st.g.sh.style.transform = "translateX(" + (-130 - ryN * 560).toFixed(1) + "%)";
-      st.g.sh.style.opacity = String((0.06 + 0.52 * Math.abs(ryN)) * e);
-      st.g.gl.style.transform = "translate3d(" + (ryN * 46).toFixed(1) + "%, " +
-        (-rxN * 52).toFixed(1) + "%, 0)";
-      st.g.gl.style.opacity = String(Math.min(1, (0.08 + Math.abs(ryN) * 0.4 + Math.abs(rxN) * 0.55) * e));
-      st.g.rm.style.opacity = String((0.1 + 0.55 * e) * (0.5 + 0.5 * Math.abs(ryN)));
+      var sht = "translateX(" + (-130 - ryN * 560).toFixed(1) + "%)";
+      if (st.g.sh.style.transform !== sht) st.g.sh.style.transform = sht;
+      var sho = String((0.06 + 0.52 * Math.abs(ryN)) * e);
+      if (st.g.sh.style.opacity !== sho) st.g.sh.style.opacity = sho;
+      var glt = "translate3d(" + (ryN * 46).toFixed(1) + "%, " + (-rxN * 52).toFixed(1) + "%, 0)";
+      if (st.g.gl.style.transform !== glt) st.g.gl.style.transform = glt;
+      var glo = String(Math.min(1, (0.08 + Math.abs(ryN) * 0.4 + Math.abs(rxN) * 0.55) * e));
+      if (st.g.gl.style.opacity !== glo) st.g.gl.style.opacity = glo;
+      var rmo = String((0.1 + 0.55 * e) * (0.5 + 0.5 * Math.abs(ryN)));
+      if (st.g.rm.style.opacity !== rmo) st.g.rm.style.opacity = rmo;
+    }
+    /* ホールド中も原カード⇄幻影の内部スクロール位置を同期する（フレームは回し続ける） */
+    if (st.card) {
+      var _sB2 = st.card.querySelector(".exBod"), _gB2 = st.el.querySelector(".exBod");
+      if (_sB2 && _gB2 && _gB2.scrollTop !== _sB2.scrollTop) _gB2.scrollTop = _sB2.scrollTop;
     }
     raf = requestAnimationFrame(frame);
   }
@@ -594,6 +637,17 @@
       gSh.className = "gl-sheen"; gGl.className = "gl-glint"; gRm.className = "gl-rim";
       [gSh, gGl, gRm].forEach(function (x) { x.setAttribute("aria-hidden", "true"); c.appendChild(x); });
       document.body.appendChild(c);
+      /* カード内スクロール(.exBod)を幻影にも反映：位置を合わせ、幻影内にもスライダーを装備 */
+      var _srcB = card.querySelector(".exBod"), _flyB = c.querySelector ? c.querySelector(".exBod") : null;
+      if (_srcB && _flyB) {
+        /* クローンには元カードの古い滑条(.pvs2/旧リスナー)が入っているので、一旦取り除いて新規生成する */
+        var _oldP = _flyB.querySelectorAll ? _flyB.querySelectorAll(".pvs2") : null;
+        if (_oldP && _oldP.length) _oldP.forEach(function (op) { op.remove(); });
+        _flyB.classList.remove("pvs2-on");
+        var _sh0 = _flyB.scrollHeight;   /* レイアウトを確定させてから位置を合わせる */
+        _flyB.scrollTop = _srcB.scrollTop;
+        installSlider(_flyB, { wrap: 'pvs2', track: 'pv2-track', thumb: 'pv2-thumb', on: 'pvs2-on', thr: 6, minTh: 18 });
+      }
       st = { el: c, t: 0, dir: 1, ry: 0, rx: 0, ryT: 0, rxT: 0, card: card,
              g: { sh: gSh, gl: gGl, rm: gRm } };
       window.__cardFX.ghost++;
@@ -682,7 +736,24 @@
     hoverCard = card;
     card.classList.add("lift-src");
     panel.classList.add("lifting");
+    /* スクロール位置でカードの一部が欠けていると幻影も途切れて見える。
+       最寄りへスクロールして全体を出してから飛ばす（hover操作はそのまま） */
+    try {
+      var _pr = panel.getBoundingClientRect();
+      var _cr = card.getBoundingClientRect();
+      if (_cr.bottom > _pr.bottom + 2 || _cr.top < _pr.top - 2) {
+        card.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+    } catch (err) { try { card.scrollIntoView(true); } catch (e2x) {} }
     spawn(card);
+    syncBldHighlight();
+  }
+  /* 右カードのホバー中だけ地図の対応棟を光らせる（幻影と同時） */
+  function syncBldHighlight() {
+    var h = window.__mapBld;
+    if (!h) return;
+    var bid = hoverCard ? (hoverCard.getAttribute("data-bid") || "") : "";
+    h.hover(/^[ABCD]$/.test(bid) ? bid : "");
   }
   function leave(card, why) {
     if (!card || hoverCard !== card) return;
@@ -690,6 +761,7 @@
     window.__cardFX.leave++;
     logEvt("leave", why || "exit", null, elTag(card));
     hoverCard = null;
+    syncBldHighlight();
     card.classList.remove("lift-src", "fb");
     fallbackOn = false;
     if (st) st.fast = true;   /* 退場は素早く沈め、他カードの滲み(blur)も早く戻す */
@@ -766,6 +838,7 @@
     cards.forEach(function (c) { c.classList.remove("lift-src", "fb"); });
     hoverCard = null;
     geoWatch = false;
+    syncBldHighlight();
     if (had) logEvt("drop", reason, null, "");
   }
   addWipe();                     /* 入場時もワイプが開き切るまでパネルを隠す */
@@ -790,6 +863,133 @@
     hadArrived = nowArrived;
   });
   try { obsClass.observe(document.body, { attributes: true, attributeFilter: ["class"] }); } catch (err) {}
+})();
+
+/* スライダー共通実装：パネル用(.pvs)とカード内(.pvs2)を1つの生成関数に集約 */
+function installSlider(host, cfg) {
+  var parent = host && host.parentElement;
+  if (!host || !parent || parent.querySelector('.' + cfg.wrap)) return;
+  var wrap = document.createElement('div'); wrap.className = cfg.wrap;
+  var tk = document.createElement('i'); tk.className = cfg.track; wrap.appendChild(tk);
+  var tb = document.createElement('i'); tb.className = cfg.thumb; wrap.appendChild(tb);
+  parent.appendChild(wrap);   /* スクローラ(host)の外＝カード直下に置き、内容と一緒に動かない */
+  function place() {
+    var pr = parent.getBoundingClientRect();
+    var hr = host.getBoundingClientRect();
+    wrap.style.top = Math.max(0, Math.round((hr.top - pr.top) - (parent.clientTop || 0))) + 'px';
+    wrap.style.height = Math.round(hr.height) + 'px';
+  }
+  function upd() {
+    var sh = host.scrollHeight, ch = host.clientHeight;
+    var can = sh - ch > cfg.thr;
+    host.classList.toggle(cfg.on, can);
+    wrap.classList.toggle('pvs2-show', can);
+    place();
+    if (!can) return;
+    var max = Math.max(1, sh - ch);
+    var th = Math.max(cfg.minTh, Math.min(Math.round(ch * ch / sh), Math.round(ch * 0.09)));  /* つまみ≦9%高：行程≧90% */
+    var range = Math.max(1, ch - th);
+    tb.style.height = th + 'px';
+    tb.style.top = Math.round(host.scrollTop / max * range) + 'px';
+  }
+  function later() { setTimeout(upd, 60); }
+  host.addEventListener('scroll', upd, { passive: true });
+  window.addEventListener('resize', later);
+  try { if (window.ResizeObserver) new ResizeObserver(later).observe(host); } catch (e) {}
+  [0, 250, 600, 1300, 2400].forEach(function (ms) { setTimeout(upd, ms); });
+  var dragging = false, sY = 0, sS = 0;
+  tk.addEventListener('pointerdown', function (e) {
+    if (e.target !== tk) return;
+    var r = host.getBoundingClientRect();
+    var sh = host.scrollHeight, ch = host.clientHeight;
+    var th = tb.offsetHeight || cfg.minTh, range = Math.max(1, ch - th);
+    var frac = Math.max(0, Math.min(1, (e.clientY - r.top - th / 2) / range));
+    host.scrollTop = Math.round(frac * (sh - ch));
+  });
+  tb.addEventListener('pointerdown', function (e) {
+    dragging = true; sY = e.clientY; sS = host.scrollTop;
+    if (tb.setPointerCapture) { try { tb.setPointerCapture(e.pointerId); } catch (e2) {} }
+    e.preventDefault();
+  });
+  tb.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var sh = host.scrollHeight, ch = host.clientHeight, max = Math.max(0, sh - ch);
+    var th = tb.offsetHeight || cfg.minTh, range = Math.max(1, ch - th);
+    host.scrollTop = Math.round(sS + (e.clientY - sY) * (max / range));
+  });
+  function endDrag() { dragging = false; }
+  tb.addEventListener('pointerup', endDrag);
+  tb.addEventListener('pointercancel', endDrag);
+  window.addEventListener('pointerup', endDrag);
+  /* 槽はスクローラの外に置いたので、槽の上でホイールした時は中身へ転送する */
+  wrap.addEventListener('wheel', function (e) {
+    if (host.scrollHeight <= host.clientHeight) return;
+    var dy = (e.deltaMode === 1 ? e.deltaY * 16 : (e.deltaY || 0));
+    host.scrollTop += Math.max(-200, Math.min(200, dy));
+    e.preventDefault();
+  }, { passive: false });
+  upd();
+}
+document.querySelectorAll('#exPanel .exBod').forEach(function (bod) {
+  installSlider(bod, { wrap: 'pvs2', track: 'pv2-track', thumb: 'pv2-thumb', on: 'pvs2-on', thr: 6, minTh: 18 });
+});
+
+/* ===== fxdbg: URLに ?fxdbg=1 を付けると、問題の数値を画面左下に出す（開発用・既定OFF） ===== */
+(function () {
+  if (!location.search || location.search.indexOf('fxdbg') < 0) return;
+  var box = document.createElement('pre');
+  box.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:2147483000;background:rgba(0,0,0,.9);color:#9fe;font:11px/1.5 ui-monospace,monospace;padding:8px 10px;border:1px solid #48f;border-radius:4px;max-width:76vw;white-space:pre-wrap;pointer-events:none;box-shadow:0 0 18px rgba(0,90,255,.4)';
+  box.id = 'fxdbg';
+  document.body.appendChild(box);
+  var px = -1, py = -1, wl = [];
+  function clsChain(el) {
+    var o = [], n = 0;
+    while (el && n < 5) {
+      var c = el.className;
+      if (c && c.baseVal !== undefined) c = c.baseVal;
+      o.push(el.tagName.toLowerCase() + (typeof c === 'string' && c ? '.' + c.split(/\s+/).slice(0, 2).join('.') : ''));
+      el = el.parentElement; n++;
+    }
+    return o.join(' < ');
+  }
+  function measure() {
+    var el = px < 0 ? null : document.elementFromPoint(px, py);
+    var L = [];
+    L.push('ptr ' + px + ',' + py + ' @ ' + (el ? (el.className && el.className.baseVal !== undefined ? el.className.baseVal : (el.className || el.tagName)) : 'none'));
+    var bod = el ? el.closest ? el.closest('.exBod') : null : null;
+    if (!bod) bod = document.querySelector('#exPanel .exBod');   /* フォールバック：先頭カード */
+    if (!bod) { box.textContent = L.join('\n'); return; }
+    var br = bod.getBoundingClientRect();
+    var card = bod.closest('.exBldg');
+    var cr = card ? card.getBoundingClientRect() : null;
+    var sv = (card || bod).querySelector('.pvs2');
+    var srect = sv ? sv.getBoundingClientRect() : null;
+    var tb = sv ? sv.querySelector('.pv2-thumb') : null;
+    var rooms = bod.querySelector('.exFloor:last-child .rooms, .exFloor .rooms');
+    var rr = rooms ? rooms.getBoundingClientRect() : null;
+    L.push('exBod client=' + bod.clientHeight + ' scroll=' + bod.scrollHeight + ' top=' + bod.scrollTop + ' max=' + (bod.scrollHeight - bod.clientHeight));
+    L.push('exBod rect l=' + Math.round(br.left) + ' r=' + Math.round(br.right) + ' w=' + Math.round(br.width) + ' t=' + Math.round(br.top) + ' b=' + Math.round(br.bottom));
+    if (cr) L.push('card   rect l=' + Math.round(cr.left) + ' r=' + Math.round(cr.right) + ' w=' + Math.round(cr.width));
+    L.push('content right(rooms)= ' + (rr ? Math.round(rr.right) : '?') + '   card/body right gap=' + (cr ? Math.round(cr.right - (rr ? rr.right : cr.right)) : '?'));
+    L.push('slider on=' + bod.classList.contains('pvs2-on') + ' wrap=' + (srect ? 'l' + Math.round(srect.left) + ' r' + Math.round(srect.right) + ' w' + Math.round(srect.width) + ' t' + Math.round(srect.top) + ' b' + Math.round(srect.bottom) : 'none'));
+    if (tb) L.push('thumb top=' + tb.style.top + ' h=' + tb.offsetHeight + '  trackH=' + (srect ? Math.round(srect.height) : 0));
+    L.push('viewport=inner ' + window.innerWidth + 'x' + window.innerHeight);
+    L.push('pointer@ ' + (el ? clsChain(el) : 'none'));
+    if (wl.length) L.push('wheel[] ' + wl.map(function (w) { return w.x + ',' + w.y + ' dy' + w.dy + (w.m ? 'm' + w.m : '') + (w.def ? '!prevented' : '') + '→' + w.t; }).join('  ||  '));
+    else L.push('wheel[] (まだなし: その状態のままホイールを回してみて)');
+    box.textContent = L.join('\n');
+  }
+  window.addEventListener('pointermove', function (e) { px = e.clientX; py = e.clientY; measure(); }, { passive: true });
+  window.addEventListener('wheel', function (e) {
+    var t = e.target, tc = t ? (t.className && t.className.baseVal !== undefined ? t.className.baseVal : (typeof t.className === 'string' ? t.className : t.tagName || '')) : '';
+    wl.push({ x: Math.round(e.clientX), y: Math.round(e.clientY), dy: Math.round(e.deltaY), m: e.deltaMode, def: e.defaultPrevented, t: (t ? t.tagName.toLowerCase() + (tc ? '.' + String(tc).split(/\s+/).slice(0, 2).join('.') : '') : 'none') });
+    if (wl.length > 4) wl.shift();
+    px = e.clientX; py = e.clientY;
+    measure();
+  }, { passive: true });
+  window.addEventListener('scroll', measure, { passive: true });
+  window.addEventListener('resize', function () { setTimeout(measure, 120); });
+  measure();
 })();
 </script>
 <script src="src/site.js"></script>

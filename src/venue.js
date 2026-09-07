@@ -16,7 +16,7 @@
   const FIELD = [[-66, -84], [18, -84], [18, 10], [-20, 10], [-66, -40]];
 
   const BLOCKS = [
-    { id: "G", name: "体育館", fill: "#b8bfd0", x0: -66, x1: 4, z0: -148, z1: -124, floors: 1, plain: true },
+    { id: "G", name: "体育館", fill: "#b8bfd0", x0: -60, x1: 10, z0: -142, z1: -118, floors: 1, plain: true },  /* 右下へ少し移動 */
     { id: "D", name: "D棟（総合）", fill: "#e6dcef", x0: 44, x1: 78, z0: -150, z1: -120, floors: 4, axis: "z" },
     { id: "A", name: "A棟（高校）", fill: "#e5d7cf", x0: 42, x1: 56, z0: -102, z1: -2, floors: 3, axis: "z" },
     { id: "B", name: "B棟（中高）", fill: "#dfe6f6", x0: 68, x1: 82, z0: -102, z1: -2, floors: 2, axis: "z" },
@@ -172,23 +172,40 @@
     p.push('<line x1="' + MX(ROAD.x1).toFixed(1) + '" y1="' + (MY(ROAD.z0) + 4).toFixed(1) + '" x2="' + MX(ROAD.x1).toFixed(1) + '" y2="' + (MY(ROAD.z1) - 4).toFixed(1) + '" stroke="#7b86a4" stroke-width="1"/>');
     p.push('<line x1="' + MX((ROAD.x0 + ROAD.x1) / 2).toFixed(1) + '" y1="' + MY(ROAD.z0).toFixed(1) + '" x2="' + MX((ROAD.x0 + ROAD.x1) / 2).toFixed(1) + '" y2="' + MY(ROAD.z1).toFixed(1) + '" stroke="#98a3bd" stroke-width="1.4" stroke-dasharray="10 9"/>');
     p.push('<text x="' + MX((ROAD.x0 + ROAD.x1) / 2).toFixed(1) + '" y="' + MY(-58).toFixed(1) + '" fill="#aeb7cc" font-size="12" text-anchor="middle" font-family="DotGothic16,monospace">道路</text>');
+    /* 体育館とグランドの間：元の南北道路から西へ延びる横断通路（元の道路より長くしない短い延長） */
+    const HROAD = { x0: -38, x1: 26, z0: -108, z1: -100, label: "通路" };
+    {
+      const hx = MX(HROAD.x0), hy = MY(HROAD.z0);
+      const hw = (HROAD.x1 - HROAD.x0) * S, hh = (HROAD.z1 - HROAD.z0) * S;
+      p.push('<rect x="' + hx.toFixed(1) + '" y="' + hy.toFixed(1) + '" width="' + hw.toFixed(1) + '" height="' + hh.toFixed(1) + '" fill="#22283d" stroke="#55607f" stroke-width="1.2"/>');
+      p.push('<line x1="' + hx.toFixed(1) + '" y1="' + (hy + 3).toFixed(1) + '" x2="' + (hx + hw).toFixed(1) + '" y2="' + (hy + 3).toFixed(1) + '" stroke="#7b86a4" stroke-width="1"/>');
+      p.push('<line x1="' + hx.toFixed(1) + '" y1="' + (hy + hh - 3).toFixed(1) + '" x2="' + (hx + hw).toFixed(1) + '" y2="' + (hy + hh - 3).toFixed(1) + '" stroke="#7b86a4" stroke-width="1"/>');
+      p.push('<line x1="' + hx.toFixed(1) + '" y1="' + (hy + hh / 2).toFixed(1) + '" x2="' + (hx + hw).toFixed(1) + '" y2="' + (hy + hh / 2).toFixed(1) + '" stroke="#98a3bd" stroke-width="1.4" stroke-dasharray="10 9"/>');
+      p.push('<text x="' + (hx + hw / 2).toFixed(1) + '" y="' + (hy + hh / 2 + 3).toFixed(1) + '" fill="#aeb7cc" font-size="11" text-anchor="middle" font-family="DotGothic16,monospace">' + esc(HROAD.label) + '</text>');
+    }
 
     const lvl = LEVELMAP.find(l => l.band === curLevel);
     BLOCKS.forEach(b => {
       const fl = lvl ? lvl[b.id] : null;
       const has = !!fl;
       const w = (b.x1 - b.x0) * S, h = (b.z1 - b.z0) * S;
-      p.push('<rect x="' + MX(b.x0).toFixed(1) + '" y="' + MY(b.z0).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) +
-        '" rx="1" fill="' + b.fill + '" stroke="#0a0d18" stroke-width="2.2" opacity="' + (has ? 1 : .32) + '"/>');
-      /* ラベル：D/G（上側の余地が狭く部屋に被るので1行）と A/B/C（下側の空き地、2行）で分ける */
+      const hd = HEAD[b.id] || null;                       /* 棟ごとの対応色 */
+      const out = hd ? hd[1] : "#0a0d18";                  /* 輪郭色（デフォルト） */
+      const lbl = hd ? hd[0] : "#f4eeda";                  /* ラベル色／ハイライト色 */
+      p.push('<rect class="bld bld-' + b.id + '" data-bid="' + b.id + '" x="' + MX(b.x0).toFixed(1) +
+        '" y="' + MY(b.z0).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) +
+        '" rx="1" fill="' + b.fill + '" stroke="' + out + '" stroke-width="2.2" opacity="' + (has ? 1 : .32) +
+        '" style="--bd:' + out + ';--bg:' + lbl + '"/>');
+      /* ラベル：D/G（上側の余地が狭く部屋に被るので1行）と A/B/C（下側の空き地、2行）で分ける。
+         棟名の文字も対応色で染める */
       const cxL = MX((b.x0 + b.x1) / 2).toFixed(1);
       if (b.id === "D" || b.id === "G") {
-        const yy = MY((b.id === "G" ? b.z0 - 8 : b.z0 - 8));
-        p.push('<text x="' + cxL + '" y="' + (yy + 16).toFixed(1) + '" fill="#f4eeda" font-size="' + (has ? 13 : 12) +
+        const yy = MY(b.z0 - 8);
+        p.push('<text x="' + cxL + '" y="' + (yy + 16).toFixed(1) + '" fill="' + lbl + '" font-size="' + (has ? 13 : 12) +
           '" text-anchor="middle" font-weight="bold" font-family="Kaisei Tokumin,serif">' + esc(b.name) + (has ? '　' + fl + 'F' : '') + '</text>');
       } else {
         const yy = MY(Math.min(b.z1 + 17, ZMAX - 5));
-        p.push('<text x="' + cxL + '" y="' + (yy + 14).toFixed(1) + '" fill="#f4eeda" font-size="15" text-anchor="middle" font-weight="bold" font-family="Kaisei Tokumin,serif">' + esc(b.name) + '</text>');
+        p.push('<text x="' + cxL + '" y="' + (yy + 14).toFixed(1) + '" fill="' + lbl + '" font-size="15" text-anchor="middle" font-weight="bold" font-family="Kaisei Tokumin,serif">' + esc(b.name) + '</text>');
         p.push('<text x="' + cxL + '" y="' + (yy + 27).toFixed(1) +
           '" fill="' + (has ? "#ffe9c9" : "#66708a") + '" font-size="10" text-anchor="middle" font-family="DotGothic16,monospace">' + (has ? "この高さ： " + fl + "F" : "（無し）") + '</text>');
       }
@@ -241,12 +258,13 @@
     });
   }
   svg.addEventListener("click", (e) => {
-    const r = e.target.closest(".room");
+    const r = e.target.closest ? e.target.closest(".room") : null;
     sel = r ? (sel === r.getAttribute("data-key") ? null : r.getAttribute("data-key")) : null;
     draw();
+    applyHover();   /* 再描画で消えたホバーハイライトを復元 */
   });
   floorSel.addEventListener("change", () => {
-    curLevel = parseInt(floorSel.value, 10) || 3; sel = null; draw();
+    curLevel = parseInt(floorSel.value, 10) || 3; sel = null; draw(); applyHover();
     const w = document.getElementById("planSvgWrap");
     if (w) { w.classList.remove("fx"); void w.offsetWidth; w.classList.add("fx"); }
   });
@@ -271,10 +289,12 @@
         }).join("");
         rows.push('<div class="exFloor"><span class="fl">' + f + 'F</span><span class="rooms">' + chips + '</span></div>');
       });
-      return '<div class="exBldg" style="border-color:' + HEAD[bid][1] + '">' +
+      return '<div class="exBldg" data-bid="' + bid + '" style="border-color:' + HEAD[bid][1] + '">' +
         '<div class="exName" style="background:' + HEAD[bid][0] + ';color:' + HEAD[bid][1] + '">' + esc(b.name) + '</div>' +
+        '<div class="exBod">' +
         rows.join("") +
         (note[bid] ? '<div class="exFloor"><span class="fl"></span><span class="rooms">' + note[bid] + '</span></div>' : '') +
+        '</div>' +
         '</div>';
     }).join("");
     exPanel.innerHTML = html;
@@ -283,6 +303,38 @@
   rebuildLevels();
   draw();
   renderExploded();
+
+  /* ---- 棟ハイライト：右カードにホバー中（幻影と同時）だけ地図の対応棟を光らせる ---- */
+  let hoverBid = null;
+  function applyHover() {
+    if (exPanel) exPanel.querySelectorAll(".exBldg").forEach(el =>
+      el.classList.toggle("sel", hoverBid && el.getAttribute("data-bid") === hoverBid));
+    svg.querySelectorAll(".bld.lit").forEach(el => el.classList.remove("lit"));
+    svg.querySelectorAll(".ring").forEach(el => el.remove());
+    if (!hoverBid) return;
+    const lvl = LEVELMAP.find(l => l.band === curLevel);
+    const has = lvl && lvl[hoverBid] != null;
+    const b = BLOCKS.find(x => x.id === hoverBid);
+    const hd = HEAD[hoverBid];
+    if (!has || !b || !hd) return;
+    const rect = svg.querySelector('.bld[data-bid="' + hoverBid + '"]');
+    if (rect) rect.classList.add("lit");
+    const ns = "http://www.w3.org/2000/svg";
+    const ring = document.createElementNS(ns, "rect");
+    ring.setAttribute("class", "ring");
+    ring.setAttribute("data-bid", hoverBid);
+    ring.setAttribute("x", (MX(b.x0) - 6).toFixed(1));
+    ring.setAttribute("y", (MY(b.z0) - 6).toFixed(1));
+    ring.setAttribute("width", ((b.x1 - b.x0) * S + 12).toFixed(1));
+    ring.setAttribute("height", (Math.abs(b.z1 - b.z0) * S + 12).toFixed(1));
+    ring.setAttribute("rx", "3");
+    ring.setAttribute("stroke", hd[0]);
+    svg.appendChild(ring);
+  }
+  window.__mapBld = {
+    hover: function (bid) { hoverBid = bid || null; applyHover(); },
+    clear: function () { hoverBid = null; applyHover(); }
+  };
 
   /* ==================== 検索：自動ジャンプ＋ハイライト ==================== */
   const sInp = document.getElementById("planSearch");
@@ -327,7 +379,7 @@
     if (!hit) return;
     const lvl = LEVELMAP.find(l => l[hit.bid] === hit.f && hit.f != null);
     if (lvl) { curLevel = lvl.band; if (floorSel.value != lvl.band) floorSel.value = lvl.band; }
-    draw();
+    draw(); applyHover();
     const key = roomKey(hit.bid, hit.f, hit.nm);
     const r = nodeByKey("#planSvg rect", key);
     if (r) {

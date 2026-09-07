@@ -164,6 +164,7 @@
   let px = innerWidth * 0.78, py = innerHeight * 0.32;
   let cx = px, cy = py, hx = px, hy = py;
   let up = false, awaySince = 0, intro = true;
+  let lastMoveAt = performance.now(), slowTO = null;  /* アイドル時は60fpsを止めてスロー更新に */
   let bTZ = 0, bTX = 0;                    /* ベルがマウスに顔を向ける角度 */
   const t0 = performance.now();
   /* ホバー中の操作要素を狐火が「包む」（ベルより優先） */
@@ -305,10 +306,18 @@
     if (bsvg && (Math.abs(bTZ) > 0.05 || Math.abs(bTX) > 0.05)) {
       bsvg.style.transform = "perspective(900px) rotateX(" + bTX.toFixed(2) + "deg) rotateZ(" + bTZ.toFixed(2) + "deg)";
     } else if (bsvg && bsvg.style.transform) bsvg.style.transform = "";
-    requestAnimationFrame(step);
+    /* 常時60fpsだと静止中もCPUを消費。マウスが動いている間・何かを包んでいる間・導入部は通常フレーム、
+       静止時は150ms間隔のスロー更新へ落とす（時間経過のベル収納等はそのまま動く） */
+    if (intro || wrapT || (now - lastMoveAt) < 150) {
+      requestAnimationFrame(step);
+    } else {
+      slowTO = setTimeout(function () { slowTO = null; requestAnimationFrame(step); }, 150);
+    }
   }
   window.addEventListener("mousemove", function (e) {
     px = e.clientX; py = e.clientY;
+    lastMoveAt = performance.now();
+    if (slowTO) { clearTimeout(slowTO); slowTO = null; requestAnimationFrame(step); }  /* スロー待ちなら即60fpsへ */
     if (intro) intro = false;
     var t = e.target;
     var el = null;
